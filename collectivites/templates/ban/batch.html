@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block body_class %}ban_batch{% endblock %}
+
+{% block content %}
+<div class="row mwide twide">
+    <div class="col wide">
+        <h2>Téléverser des adresses dans la Base adresse nationale</h2>
+        <div id="batch"></div>
+    </div>
+</div>
+<script type="text/javascript">
+    BAN.balUploader('#batch');
+</script>
+{% endblock content %}

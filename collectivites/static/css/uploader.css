@@ -1,0 +1,22 @@
+.uploader input[type="file"] {
+    display: none;
+}
+.uploader .holder {
+    height: 200px;
+    line-height: 200px;
+    text-align: center;
+    border: 1px dashed #ccc;
+    margin: 20px 0;
+}
+.uploader .error {
+    background-color: #F64747;
+    padding: 20px;
+    text-align: center;
+    display: none;
+}
+.uploader.has-error .error {
+    display: block;
+}
+progress {
+  width: 100%;
+}
