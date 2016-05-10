@@ -53,6 +53,10 @@ def ban_batch():
         return resp.text
     return render_template('ban/batch.html')
 
+@app.route('/ban/groups')
+def ban_groups():
+    return render_template('ban/groups.html')
+
 
 # Oauth
 oauth = OAuth(app)

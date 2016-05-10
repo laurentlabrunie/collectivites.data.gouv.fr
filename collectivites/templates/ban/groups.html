@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mwide twide">
+    <div class="col wide">
+        <h2>Consulter les adresses d'une commune</h2>
+        <div id="municipality-selector">
+            <form>
+                <input type="search" placeholder="Libellé de la commune …"/>
+            </form>
+            <div class="results"></div>
+        </div>
+        <div id="groups"></div>
+    </div>
+</div>
+
+<script>
+    BAN.displaySelector('#municipality-selector');
+</script>
+{% endblock content %}
