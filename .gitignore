@@ -1,5 +1,6 @@
 node_modules/
 npm-debug.log
+python_modules/
 __pycache__
 *~
 db.sql
