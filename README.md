@@ -14,7 +14,7 @@ Prototype d'un portail dédié aux collectivités (et plus).
 Create a python file for configuration somewhere, and register it
 with an environment variable:
 
-    export COLLECTIVITES_CONFIG_MODULE='/path/to/your/file.py'
+    export COLLECTIVITES_SETTINGS='/path/to/your/file.py'
 
 Inside the file, you need at least OAuth related settings to get
 auth from Data.gouv.fr and a BAN client auth id and secret:
