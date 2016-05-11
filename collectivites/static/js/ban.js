@@ -5,8 +5,19 @@ var BAN = {};
 BAN.balUploader = function (selector) {
 
     var onSuccess = function (body) {
-        body = JSON.parse(body);
+        try {
+            body = JSON.parse(body);
+        } catch (err) {
+            Z.qs('.error').innerHTML = body;
+            Z.addClass(Z.qs(selector), 'has-error');
+            return;
+        }
         var container = Z.el('div', 'bal-reports', Z.qs(selector));
+        if (!body.report) {
+            Z.qs('.error').innerHTML = JSON.stringify(body);
+            Z.addClass(Z.qs(selector), 'has-error');
+            return;
+        }
         if (body.report.error) printLevel(container, 'error', body.report);
         if (body.report.notice) printLevel(container, 'notice', body.report);
     }
