@@ -134,10 +134,10 @@ def authorized(provider):
 @app.context_processor
 def shared_context():
     return {
-        "SITE_NAME": "collectivités.data.gouv.fr",
+        "SITE_NAME": "territoires.data.gouv.fr",
         "SITE_URL": app.config['SITE_URL'],
-        "BASELINE": "Le portail des collectivités territoriales pour la modernisation",  # noqa
-        "DESCRIPTION": "Portail des collectivités pour la modernisation",
+        "BASELINE": "Le portail des territoires pour la modernisation",  # noqa
+        "DESCRIPTION": "Portail des territoires pour la modernisation",
         "TWITTER": "@SGMAP",
         "API_URL": app.config['API_URL'],
         "CONTACT_EMAIL": "collectivites@data.gouv.fr"
