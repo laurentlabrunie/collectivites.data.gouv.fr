@@ -47,11 +47,13 @@ def ban_batch():
     if request.method == 'POST':
         token = session.get('ban_token')
         auth = "Bearer {}".format(token)
-        resp = requests.post('http://localhost:5959/import/bal',
+        url = '{base_url}/import/bal'.format(base_url=app.config['BAN_URL'])
+        resp = requests.post(url,
                              headers={'Authorization': auth},
                              files={'data': ('f.csv', request.files['data'])})
         return resp.text
     return render_template('ban/batch.html')
+
 
 @app.route('/ban/groups')
 def ban_groups():
