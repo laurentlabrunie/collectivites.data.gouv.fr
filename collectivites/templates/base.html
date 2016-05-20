@@ -24,6 +24,8 @@
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/uploader.css') }}">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
+        <!-- CDNJS :: Sortable (https://cdnjs.com/) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.4.2/Sortable.min.js"></script>
         <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
         <script src="{{ url_for('static', filename='js/ban.js') }}"></script>
         {% block extrahead %}{% endblock %}
@@ -44,6 +46,7 @@
                     <li><a href="{{ url_for('ban_batch') }}">Téléverser des adresses</a></li>
                     <li><a href="{{ url_for('ban_groups') }}">Consulter les adresses d'une commune</a></li>
                     <li><a href="{{ url_for('index') }}">Téléverser un PLU</a></li>
+                    <li><a href="{{ url_for('ban_duplication') }}">Dédoublonner les nom de voies dans la BAN</a></li>
                   {% endif %}
                 </ul>
             </section>

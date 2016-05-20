@@ -144,3 +144,8 @@ def shared_context():
         "API_URL": app.config['API_URL'],
         "CONTACT_EMAIL": "collectivites@data.gouv.fr"
     }
+
+
+@app.route('/ban/duplication')
+def ban_duplication():
+    return render_template('ban/duplication.html')
