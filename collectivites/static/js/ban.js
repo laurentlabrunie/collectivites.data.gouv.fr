@@ -43,7 +43,7 @@ BAN.listGroups = function (selector, municipality) {
     }});
 }
 
-var resultsTmpl = '<ul>{{#each municipalities}}<li><a data-citycode="{{citycode}}" href>{{name}} ({{department}})</a></li>{{/each}}</ul>';
+var resultsTmpl = '<ul>{{#each municipalities}}<li><a data-citycode="{{citycode}}" data-department="{{department}}" data-name="{{name}}" href>{{name}} ({{department}})</a></li>{{/each}}</ul>';
 
 BAN.displaySelector = function (selector) {
     Z.qs(selector + ' input').addEventListener('input', function (event) {
@@ -72,50 +72,63 @@ BAN.searchMunicipality = function (selector, q) {
 }
 
 
-BAN.displaySelectorForDuplicate = function (selector1, selector2) {
+
+
+BAN.displaySelectorMunicipalityForDuplicate = function (selector1, selector2) {
     Z.qs(selector1 + ' input').addEventListener('input', function (event) {
         BAN.searchMunicipality(selector1, event.target.value);
-        //Z.qs(selector2).classList.add('hidden');
     });
     Z.qs(selector1 + ' .results').addEventListener('click', function (e) {
         if (e.target.nodeName.toLowerCase() === 'a') {
             Z.qs(selector2).innerHTML = "<h1>En cours de traitement<h2>"
-            BAN.listGroupsComplete(selector2, e.target.dataset.citycode);
+            BAN.listGroupsComplete(selector2, e.target.dataset);
             Z.stop(e);
             Z.qs(selector1 + ' .results').classList.add('hidden');
-            //Z.qs(selector2).classList.remove('hidden');
         }
     });
     window.addEventListener('endOfLoad', function (e) {
-            console.log(window.sessionStorage.JSON);
-            Z.qs(selector2).innerHTML = Handlebars.compile(groupListTmpl)({ groups: JSON.parse(window.sessionStorage.JSON) });
+            window.open(Z.qs('#url').value, "_self");
     });
 }
 
 // Récupère la liste totale des voies pour une commune à partir du numéro insee
+// Et la met en session sous forme JSON
 
 var UriGroup = 'http://ban-dev.data.gouv.fr';
 var nbEnreg = 100;
-var event = new CustomEvent('endOfLoad', {'detail':{'hasFiniched':true}});
+var event = new CustomEvent('endOfLoad');
 
 BAN.listGroupsComplete = function (selector, municipality) {
-    municipality = municipality || '01001';
+    console.log(municipality);
 
-    var GroupJSONToArray = [];
-    window.sessionStorage.setItem("JSON", GroupJSONToArray);
+    var citycode = municipality.citycode;
+    var name = municipality.name;
+    var department = municipality.department;
 
-    Z.get({ uri: UriGroup + '/municipality/insee:' + municipality + '/groups?limit=1', callback: function (err, xhr) {
+    citycode = citycode || '01001';
+
+    var groupsJSONToArray = [];
+    window.sessionStorage.setItem("JSON", groupsJSONToArray);
+
+    Z.get({ uri: UriGroup + '/municipality/insee:' + citycode + '/groups?limit=1', callback: function (err, xhr) {
         if (err) return console.error(err);
         var total = JSON.parse(xhr.responseText).total;
 
         for (var offset = 0; offset < total; offset = offset + nbEnreg) {
 
-            Z.get({ uri: UriGroup + '/municipality/insee:' + municipality + '/groups?limit=' + nbEnreg + '&offset=' + offset, callback: function (err, xhr) {
+            Z.get({ uri: UriGroup + '/municipality/insee:' + citycode + '/groups?limit=' + nbEnreg + '&offset=' + offset, callback: function (err, xhr) {
                 if (err) return console.error(err);
-                GroupJSONToArray = GroupJSONToArray.concat(JSON.parse(xhr.responseText).collection);
+                groupsJSONToArray = groupsJSONToArray.concat(JSON.parse(xhr.responseText).collection);
 
-                if (total == GroupJSONToArray.length) {
-                    window.sessionStorage.setItem("JSON", JSON.stringify(GroupJSONToArray));
+                if (total == groupsJSONToArray.length) {
+                    var groupsMunicipalityArray = {
+                        "name": name,
+                        "department" : department,
+                        "groups": groupsJSONToArray
+                        };
+                        var groupsMunicipalityJSON = JSON.stringify(groupsMunicipalityArray);
+
+                    window.sessionStorage.setItem("JSONgroups", groupsMunicipalityJSON);
                     window.dispatchEvent(event);
                 }
             }});
@@ -123,3 +136,33 @@ BAN.listGroupsComplete = function (selector, municipality) {
     }});
 }
 
+var groupListWithoutUlTmpl = '{{#each groups}}<li>{{name}}</li>{{/each}}';
+
+BAN.displayGroups = function() {
+
+
+
+    Z.qs("#pagetitle").innerHTML = 'Fiabiliser les noms de voies dans la BAN pour la commune de '+ JSON.parse(window.sessionStorage.JSONgroups).name;
+
+    var list = document.getElementById('list');
+    Sortable.create(list, {
+        group: {
+            name: 'groups',
+            pull: 'clone',
+            put: false
+            },
+        draggable: 'li',
+        });
+
+    list.innerHTML = Handlebars.compile(groupListWithoutUlTmpl)({ groups: JSON.parse(window.sessionStorage.JSONgroups).groups });
+
+    var select = document.getElementById('select');
+    Sortable.create(select, {
+        group: {
+            name: 'groups',
+            pull: false,
+            put: true
+            }
+        });
+
+}

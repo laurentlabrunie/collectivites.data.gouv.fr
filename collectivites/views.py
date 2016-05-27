@@ -152,3 +152,7 @@ def shared_context():
 @app.route('/ban/duplication')
 def ban_duplication():
     return render_template('ban/duplication.html')
+
+@app.route('/ban/reliability')
+def ban_reliability():
+    return render_template('ban/reliability.html')

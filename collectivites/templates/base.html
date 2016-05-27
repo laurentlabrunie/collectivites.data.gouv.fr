@@ -21,13 +21,16 @@
         <meta property="og:image" content="{{ url_for('static', filename='img/logo_marianne_share.jpeg') }}">
         <meta property="og:description" content="{{ DESCRIPTION }}">
         <meta property="og:SITE_NAME" content="{{ SITE_NAME }}">
+
+
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/uploader.css') }}">
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
-        <!-- CDNJS :: Sortable (https://cdnjs.com/) -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.4.2/Sortable.min.js"></script>
         <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
         <script src="{{ url_for('static', filename='js/ban.js') }}"></script>
+
         {% block extrahead %}{% endblock %}
     </head>
     <body class="{% block body_class %}{% endblock %}">

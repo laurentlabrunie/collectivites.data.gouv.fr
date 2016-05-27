@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mwide twide">
+    <div class="col wide">
+        <h2 id="pagetitle"></h2>
+        <div id="groups" style="margin-left: 30px;">
+            <div class="block__list-title" >
+                Liste des voies et leurs doublons
+            </div>
+            <ul id="list">
+            </ul>
+
+            <div class="block__list-title">
+                Voies sélectionnées
+            </div>
+            <ul id="select">
+            </ul>
+            <div style="clear: both"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    BAN.displayGroups();
+</script>
+{% endblock content %}

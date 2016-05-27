@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<input type="hidden" value="{{ url_for('ban_reliability' )}}" id="url" />
 <div class="row mwide twide">
     <div class="col wide">
-        <h2>Dédoublonner les noms de voies dans la BAN</h2>
+        <h2>Recherche des communes</h2>
         <div id="municipality-selector">
             <form>
                 <input type="search" placeholder="Libellé de la commune …"/>
@@ -15,6 +16,6 @@
 </div>
 
 <script>
-    BAN.displaySelectorForDuplicate('#municipality-selector', '#groups');
+    BAN.displaySelectorMunicipalityForDuplicate('#municipality-selector', '#groups');
 </script>
 {% endblock content %}
