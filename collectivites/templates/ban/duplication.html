@@ -3,7 +3,7 @@
 {% block content %}
 <div class="row mwide twide">
     <div class="col wide">
-        <h2>Dédoublonner les nom de voies dans la BAN</h2>
+        <h2>Dédoublonner les noms de voies dans la BAN</h2>
         <div id="municipality-selector">
             <form>
                 <input type="search" placeholder="Libellé de la commune …"/>
@@ -13,4 +13,8 @@
         <div id="groups"></div>
     </div>
 </div>
+
+<script>
+    BAN.displaySelectorForDuplicate('#municipality-selector', '#groups');
+</script>
 {% endblock content %}

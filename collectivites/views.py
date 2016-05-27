@@ -97,16 +97,18 @@ def login(provider):
 @app.route('/logout/')
 def logout():
     session.pop('oauth_token', None)
-    session.pop('username', None)
+    session.pop('userId', None)
     session.pop('fullname', None)
+    session.pop('email', None)
     url = request.referrer or url_for('index')
     return redirect(url)
 
 
 def get_dgfr_user_details(data):
     return {
-        'username': data['id'],
-        'fullname': ' '.join([data['first_name'], data['last_name']])
+        'userId': data['id'],
+        'fullname': ' '.join([data['first_name'], data['last_name']]),
+        'email': data['email']
     }
 
 
@@ -127,8 +129,9 @@ def authorized(provider):
                               resp.get('oauth_token_secret', ''))  # Oauth1
     session['auth_provider'] = provider
     data = getter(remote_app.get(endpoint).data)
-    session['username'] = data['username']
+    session['userId'] = data['userId']
     session['fullname'] = data['fullname']
+    session['email'] = data['email']
     url = request.referrer or url_for('index')
     return redirect(url)
 
