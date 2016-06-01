@@ -81,7 +81,7 @@ BAN.displaySelectorMunicipalityForDuplicate = function (selector1, selector2) {
     });
     Z.qs(selector1 + ' .results').addEventListener('click', function (e) {
         if (e.target.nodeName.toLowerCase() === 'a') {
-            Z.qs(selector2 + ' .message').innerHTML = "<h1>En cours de traitement<h1>"
+            Z.qs(selector2 + ' #message').innerHTML = "<h1>En cours de traitement<h1>";
             BAN.listGroupsComplete(selector2, e.target.dataset);
             Z.stop(e);
         }
@@ -104,11 +104,10 @@ BAN.listGroupsComplete = function (selector, municipality) {
 
     var citycode = municipality.citycode;
     var name = municipality.name;
-    var department = municipality.department;
 
     groupsMunicipalityArray = {
         "name": name,
-        "department" : department
+        "citycode" : citycode
     }
 
     citycode = citycode || '01001';
@@ -130,7 +129,7 @@ BAN.banGroups = function (selector, url) {
                 if (false == JSONObj.hasOwnProperty('next')) {
                     groupsMunicipalityArray["groups"] = groupsJSONToArray;
 
-                    Z.qs(selector + ' input').value = JSON.stringify(groupsMunicipalityArray);
+                    Z.qs(selector + ' input').value = encodeURIComponent(JSON.stringify(groupsMunicipalityArray));
                     window.dispatchEvent(event);
                 }
                 else {
@@ -144,11 +143,16 @@ BAN.banGroups = function (selector, url) {
 
 var groupListWithoutUlTmpl = '{{#each groups}}<li class="draggable" id="{{id}}">{{name}}</li>{{/each}}';
 
-BAN.displayGroups = function() {
+BAN.displayGroups = function(encodedGroups) {
+console.log("1");
 
-    var municipality = JSON.parse(window.sessionStorage.JSONgroups).name;
-    var department = JSON.parse(window.sessionStorage.JSONgroups).department;
-    Z.qs("#pagetitle").innerHTML = 'Fiabiliser les noms de voies dans la BAN pour la commune de ' + municipality + '(' + department + ')';
+    var JSONgroups = decodeURIComponent(encodedGroups);
+
+    var municipality = JSON.parse(JSONgroups).name;
+    var citycode = JSON.parse(JSONgroups).citycode;
+    var groups = JSON.parse(JSONgroups).groups;
+
+    Z.qs("#pagetitle").innerHTML = 'Fiabiliser les noms de voies dans la BAN pour la commune de ' + municipality + ' (' + citycode + ')';
 
     var list = document.getElementById('list');
     var listSort = Sortable.create(list, {
@@ -159,10 +163,9 @@ BAN.displayGroups = function() {
             },
         draggable: '.draggable',
         sort: false,
-        scroll:true,
         });
 
-    list.innerHTML = Handlebars.compile(groupListWithoutUlTmpl)({ groups: JSON.parse(window.sessionStorage.JSONgroups).groups });
+    list.innerHTML = Handlebars.compile(groupListWithoutUlTmpl)({ groups: groups });
 
     var select = document.getElementById('select');
     var selectSort = Sortable.create(select, {
@@ -172,6 +175,7 @@ BAN.displayGroups = function() {
             put: true
             },
         sort: false,
-        scroll: true,
         });
+
+
 }

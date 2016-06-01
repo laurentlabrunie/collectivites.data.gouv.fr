@@ -4,9 +4,11 @@ from flask import (abort, redirect, render_template, request, session,
                    url_for)
 from flask.ext.oauthlib.client import OAuth
 import requests
+
 from werkzeug import security
 
 from . import app
+from . import utils
 
 
 @app.route('/')
@@ -156,8 +158,8 @@ def ban_duplication():
 
 @app.route('/ban/reliability', methods=['POST'])
 def ban_reliability():
-    if request.method == 'POST':
-        postVariable = request.form['list']
-    else:
-        postVariable = 'DONTKNOW'
-    return render_template('ban/reliability.html')
+    dictContent = utils.decodeAndUnJSON(request.form['list'])
+
+
+    return render_template('ban/reliability.html', groups=utils.jsonAndEncode(dictContent))
+

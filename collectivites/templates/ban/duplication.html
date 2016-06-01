@@ -12,8 +12,9 @@
             <div class="results"></div>
         </div>
         <div id="groups">
+            <div id="message"></div>
             <form id="formGroups" method="post" action="{{ url_for('ban_reliability' )}}">
-                <input type="text" name="list" >
+                <input type="hidden" name="list" >
             </form>
         </div>
     </div>
