@@ -153,6 +153,11 @@ def shared_context():
 def ban_duplication():
     return render_template('ban/duplication.html')
 
-@app.route('/ban/reliability')
+
+@app.route('/ban/reliability', methods=['POST'])
 def ban_reliability():
+    if request.method == 'POST':
+        postVariable = request.form['list']
+    else:
+        postVariable = 'DONTKNOW'
     return render_template('ban/reliability.html')

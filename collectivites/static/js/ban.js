@@ -72,7 +72,8 @@ BAN.searchMunicipality = function (selector, q) {
 }
 
 
-
+/* Recherche les communes correspondant à la saisie puis les affiche sous forme de lien
+        qui lance la génération de la liste des voies pour la commune et ouvre l'IHM de fiabilisation. */
 
 BAN.displaySelectorMunicipalityForDuplicate = function (selector1, selector2) {
     Z.qs(selector1 + ' input').addEventListener('input', function (event) {
@@ -80,22 +81,24 @@ BAN.displaySelectorMunicipalityForDuplicate = function (selector1, selector2) {
     });
     Z.qs(selector1 + ' .results').addEventListener('click', function (e) {
         if (e.target.nodeName.toLowerCase() === 'a') {
-            Z.qs(selector2).innerHTML = "<h1>En cours de traitement<h2>"
+            Z.qs(selector2 + ' .message').innerHTML = "<h1>En cours de traitement<h1>"
             BAN.listGroupsComplete(selector2, e.target.dataset);
             Z.stop(e);
-            Z.qs(selector1 + ' .results').classList.add('hidden');
         }
     });
     window.addEventListener('endOfLoad', function (e) {
-            window.open(Z.qs('#url').value, "_self");
+        Z.qs(selector2 + ' #formGroups').submit();
     });
 }
 
-// Récupère la liste totale des voies pour une commune à partir du numéro insee
-// Et la met en session sous forme JSON
+/* Récupère la liste totale des voies pour une commune à partir du numéro insee
+        et la met en session sous forme JSON */
 
 var uriGroup = 'http://ban-dev.data.gouv.fr';
 var event = new CustomEvent('endOfLoad');
+var groupsJSONToArray = [];
+var groupsMunicipalityArray = [];
+var JSONObj;
 
 BAN.listGroupsComplete = function (selector, municipality) {
 
@@ -103,13 +106,21 @@ BAN.listGroupsComplete = function (selector, municipality) {
     var name = municipality.name;
     var department = municipality.department;
 
+    groupsMunicipalityArray = {
+        "name": name,
+        "department" : department
+    }
+
     citycode = citycode || '01001';
 
-    var groupsJSONToArray = [];
-    var JSONObj;
     var uriComplete = uriGroup + '/municipality/insee:' + citycode + '/groups';
 
-    var banGroups = function (url) {
+    BAN.banGroups(selector, uriComplete);
+}
+
+/* fonction récurrente qui empile les listes de voies (groups) récupérées par paquets pour en faire la liste complète
+        et la stocke en session */
+BAN.banGroups = function (selector, url) {
             Z.get({ uri: url , callback: function (err, xhr) {
                 if (err) return console.error(err);
                 console.log(url);
@@ -117,26 +128,21 @@ BAN.listGroupsComplete = function (selector, municipality) {
                 groupsJSONToArray = groupsJSONToArray.concat(JSONObj.collection);
 
                 if (false == JSONObj.hasOwnProperty('next')) {
-                    var groupsMunicipalityArray = {
-                        "name": name,
-                        "department" : department,
-                        "groups": groupsJSONToArray
-                        };
-                    var groupsMunicipalityJSON = JSON.stringify(groupsMunicipalityArray);
+                    groupsMunicipalityArray["groups"] = groupsJSONToArray;
 
-                    window.sessionStorage.setItem("JSONgroups", groupsMunicipalityJSON);
+                    Z.qs(selector + ' input').value = JSON.stringify(groupsMunicipalityArray);
                     window.dispatchEvent(event);
                 }
                 else {
-                    banGroups(JSONObj.next);
+                    BAN.banGroups(selector, JSONObj.next);
                 }
             }});
     }
-    banGroups(uriComplete);
-}
 
 
-var groupListWithoutUlTmpl = '{{#each groups}}<li>{{name}}</li>{{/each}}';
+/* Affiche la liste des voies d'une commune et gère le fonctionnement du drag and drop */
+
+var groupListWithoutUlTmpl = '{{#each groups}}<li class="draggable" id="{{id}}">{{name}}</li>{{/each}}';
 
 BAN.displayGroups = function() {
 
@@ -145,25 +151,27 @@ BAN.displayGroups = function() {
     Z.qs("#pagetitle").innerHTML = 'Fiabiliser les noms de voies dans la BAN pour la commune de ' + municipality + '(' + department + ')';
 
     var list = document.getElementById('list');
-    Sortable.create(list, {
+    var listSort = Sortable.create(list, {
         group: {
             name: 'groups',
-            pull: 'clone',
-            put: false
+            pull: true,
+            put: true
             },
-        draggable: 'li',
-        sort: false
+        draggable: '.draggable',
+        sort: false,
+        scroll:true,
         });
 
     list.innerHTML = Handlebars.compile(groupListWithoutUlTmpl)({ groups: JSON.parse(window.sessionStorage.JSONgroups).groups });
 
     var select = document.getElementById('select');
-    Sortable.create(select, {
+    var selectSort = Sortable.create(select, {
         group: {
             name: 'groups',
-            pull: false,
+            pull: true,
             put: true
             },
-        sort: false
+        sort: false,
+        scroll: true,
         });
 }

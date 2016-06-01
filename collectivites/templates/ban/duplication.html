@@ -11,7 +11,11 @@
             </form>
             <div class="results"></div>
         </div>
-        <div id="groups"></div>
+        <div id="groups">
+            <form id="formGroups" method="post" action="{{ url_for('ban_reliability' )}}">
+                <input type="text" name="list" >
+            </form>
+        </div>
     </div>
 </div>
 
