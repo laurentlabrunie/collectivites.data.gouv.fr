@@ -1,12 +1,12 @@
-﻿import re
+import re
 
 '''
 library to expose useful methods for address like
 
 	guess_typeof_street:
-		evaluate type of street (from its label)
+		evaluate type of street (from its label, splited as words)
 	guess_strong_word:
-		evaluate strong word (from its label)
+		evaluate strong word (from its label, splited as words)
 '''
 
 # typeof street as list of key words, sorted by descendant number of occurences
@@ -290,17 +290,33 @@ TYPEOF_STREET_WORDS_COUNT = [ x.count(" ") +1 for x in TYPEOF_STREET_VALUES ]
 # all : '^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$'
 IS_ROMAN_NUMBER_RE = re.compile('^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$')
 
-def guess_typeof_street(street, list):
+def split_as_listof_words(street):
 	"""
-	identify type of street from complete label
+	split complete label as word(s)
 	:param street: complete label
-	:param list: list of words
+	:return: list of word(s)
+	"""
+	return re.split('\s*', street.upper())
+
+def guess_typeof_street(words):
+	"""
+	identify type of street from splited words of label
+	:param words: list of word(s)
 	:return: type of street
 	"""
+
+	'''
+	bugs:
+	1- <tos> <exlcude_word> gives <tos> instead of 2nd
+	2- <tos> where word of tos is multiple (as PASSAGE, PASSAGE A NIVEAU) gives 1st, w/o searching more!
+	'''
+	t = len(words)
+	if t == 0 :
+		return None
 	i = 0
 	while i < SIZE_TYPEOF_STREET_VALUES :
-		if TYPEOF_STREET_WORDS_COUNT[i] < len(list) and \
-			" ".join(list[:TYPEOF_STREET_WORDS_COUNT[i]]) == TYPEOF_STREET_VALUES[i]:
+		if TYPEOF_STREET_WORDS_COUNT[i] < t and \
+			" ".join(words[:TYPEOF_STREET_WORDS_COUNT[i]]) == TYPEOF_STREET_VALUES[i]:
 			return TYPEOF_STREET_VALUES[i]
 		i += 1
 
@@ -328,46 +344,39 @@ def is_numeric(word):
 		return False
 	return True
 
-def guess_strong_word(street, list):
+def guess_strong_word(words):
 	"""
-	evaluate strong word from complete label (of street)
-	:param street: complete label
-	:param list: list of words
+	evaluate strong word from splited words of label
+	:param words: list of word(s)
 	:return: strong word
 	"""
-	i = len(list) -1
+	i = len(words) - 1
+	if i < 0 :
+		return None
 	while i >= 0 :
 		# not a roman number
 		# not an arabic number
 		# not an excluded word (LAPOSTE, IGN)
 		# not an article
-		if not is_roman_number(list[i]) and not is_numeric(list[i]) :
-			if list[i] not in STRONG_WORD_EXCLUDE_LAPOSTE and \
-				list[i] not in STRONG_WORD_EXCLUDE_IGN and \
-				list[i] not in ARTICLES_VALUES :
-				return list[i]
+		if not is_roman_number(words[i]) and not is_numeric(words[i]) :
+			if words[i] not in STRONG_WORD_EXCLUDE_LAPOSTE and \
+				words[i] not in STRONG_WORD_EXCLUDE_IGN and \
+				words[i] not in ARTICLES_VALUES :
+				return words[i]
 		i -= 1
 
 	# default is last word
-	return list[-1]
+	return words[-1]
 
 
 # for tests
 if __name__ == '__main__' :
 	while True :
-		street = input('Entrer libellé Voie: ')
-		list_words = re.split('\s*', street.upper())
+		street = input('\nEntrer la Voie: ')
+		words = split_as_listof_words(street)
 
-		tos = guess_typeof_street(street, list_words)
+		tos = guess_typeof_street(words)
 		print(' type de Voie : ' + tos)
 
-		# is_roman = is_roman_number(list_words[-1])
-		# result = "oui" if is_roman else "non"
-		# print(' dernier mot est un nombre romain : ' + result)
-        #
-		# is_numeric = is_numeric(list_words[-1])
-		# result = "oui" if is_numeric else "non"
-		# print(' dernier mot est un nombre : ' + result)
-
-		sw = guess_strong_word(street, list_words)
+		sw = guess_strong_word(words)
 		print(' mot important de la Voie : ' + sw)
