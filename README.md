@@ -28,4 +28,4 @@ auth from Data.gouv.fr and a BAN client auth id and secret:
 
 To run the dev server:
 
-    make serve
+    python collectivites\serve.py
