@@ -1,6 +1,13 @@
-﻿# -*- coding: utf-8 -*-
+﻿import re
 
-import re
+'''
+library to expose useful methods for address like
+
+	guess_typeof_street:
+		evaluate type of street (from its label)
+	guess_strong_word:
+		evaluate strong word (from its label)
+'''
 
 # typeof street as list of key words, sorted by descendant number of occurences
 TYPEOF_STREET_VALUES = [
@@ -300,14 +307,14 @@ def guess_typeof_street(street, list):
 	# w/o type of street
 	return ''
 
-def is_roman_number(last_word):
+def is_roman_number(word):
 	"""
 	determine if given word is a roman number
 	:param word:
 	:return: boolean result
 	"""
-	roman = IS_ROMAN_NUMBER_RE.match(last_word)
-	return (roman == None)
+	roman = IS_ROMAN_NUMBER_RE.match(word)
+	return (roman != None)
 
 def is_numeric(word):
 	"""
@@ -330,6 +337,10 @@ def guess_strong_word(street, list):
 	"""
 	i = len(list) -1
 	while i >= 0 :
+		# not a roman number
+		# not an arabic number
+		# not an excluded word (LAPOSTE, IGN)
+		# not an article
 		if not is_roman_number(list[i]) and not is_numeric(list[i]) :
 			if list[i] not in STRONG_WORD_EXCLUDE_LAPOSTE and \
 				list[i] not in STRONG_WORD_EXCLUDE_IGN and \
@@ -337,6 +348,7 @@ def guess_strong_word(street, list):
 				return list[i]
 		i -= 1
 
+	# default is last word
 	return list[-1]
 
 
