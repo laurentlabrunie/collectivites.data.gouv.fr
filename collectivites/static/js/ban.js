@@ -84,6 +84,7 @@ BAN.displaySelectorMunicipalityForDuplicate = function (selector1, selector2) {
             Z.qs(selector2 + ' #message').innerHTML = "<h1>En cours de traitement<h1>";
             BAN.listGroupsComplete(selector2, e.target.dataset);
             Z.stop(e);
+            Z.qs(selector1 + ' .results').classList.add('hidden');
         }
     });
     window.addEventListener('endOfLoad', function (e) {
@@ -122,7 +123,6 @@ BAN.listGroupsComplete = function (selector, municipality) {
 BAN.banGroups = function (selector, url) {
             Z.get({ uri: url , callback: function (err, xhr) {
                 if (err) return console.error(err);
-                console.log(url);
                 JSONObj = JSON.parse(xhr.responseText);
                 groupsJSONToArray = groupsJSONToArray.concat(JSONObj.collection);
 
@@ -140,11 +140,9 @@ BAN.banGroups = function (selector, url) {
 
 
 /* Affiche la liste des voies d'une commune et gère le fonctionnement du drag and drop */
-
-var groupListWithoutUlTmpl = '{{#each groups}}<li class="draggable" id="{{id}}">{{name}}</li>{{/each}}';
+var groupListWithoutUlTmpl = '{{#each groups}}<li class="draggable {{class_children}}" id="{{id}}" data-father_id="{{father_id}}" >{{name}}</li>{{/each}}';
 
 BAN.displayGroups = function(encodedGroups) {
-console.log("1");
 
     var JSONgroups = decodeURIComponent(encodedGroups);
 
@@ -176,6 +174,4 @@ console.log("1");
             },
         sort: false,
         });
-
-
 }

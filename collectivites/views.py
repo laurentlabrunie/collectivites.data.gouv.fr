@@ -158,8 +158,85 @@ def ban_duplication():
 
 @app.route('/ban/reliability', methods=['POST'])
 def ban_reliability():
-    dictContent = utils.decodeAndUnJSON(request.form['list'])
+    list_content = utils.decode_and_unjson(request.form['list'])
+
+    make_file = MakeGroupList(list_content)
+    content_complete = make_file.create_content_complete()
+
+    return render_template('ban/reliability.html', groups=utils.json_and_encode(content_complete))
 
 
-    return render_template('ban/reliability.html', groups=utils.jsonAndEncode(dictContent))
+class MakeGroupList:
 
+    # travaille la liste d'origine et génère une liste où sont identifiés les doublons
+
+    def __init__(self, list_content):
+        self.municipality = list_content['name']
+        self.citycode = list_content['citycode']
+        self.list_groups = list_content['groups']
+        self.content_ordered = []
+        self.content_complete = {}
+
+    def add_compare_element(self):
+
+        # prépare les données à comparer
+        #
+        # (non finalisé pour l'instant)
+
+        for group in self.list_groups:
+            group['data_to_compare'] = group['name']
+
+    def compare_groups(self):
+
+        # compare les voies et génère une nouvelle liste où sont identifiés les différents doublons potentiels :
+        #   pour chaque voie étudiée dans la première liste,
+        #   on la copie d'abord dans la seconde liste
+        #   puis on la supprime dans la première
+
+        #   Et c'est ensuite que l'on fait la comparaison...
+
+        while len(self.list_groups) != 0:
+            father_id = self.list_groups[0]['id']
+            self.content_ordered.append(self.list_groups[0])
+            del self.list_groups[0]
+            self.compare_one_group_to_others(father_id)
+
+    def compare_one_group_to_others(self, father_id):
+
+        # ...compare la dernière voie de la seconde liste avec toutes les autres voies de la première
+        #   et identifie les doublons...
+
+        #   ...puis copie ces doublons à la suite de la voie comparée, et les supprime dans la première liste.
+
+        index_group = 0
+        nb_group = len(self.list_groups)
+        index_last_ordered = len(self.content_ordered)-1
+        while nb_group > index_group:
+            if self.list_groups[index_group]['data_to_compare'] \
+                    == self.content_ordered[index_last_ordered]['data_to_compare']:
+                self.list_groups[index_group]['father_id'] = father_id
+                self.list_groups[index_group]['class_children'] = 'children'
+                self.content_ordered.append(self.list_groups[index_group])
+                del self.list_groups[index_group]
+                nb_group -= 1
+            else:
+                index_group += 1
+
+    def add_municipality(self):
+
+        # met en forme le dictionnaire avec les données à faire passer en plus des voies
+
+        self.content_complete['name'] = self.municipality
+        self.content_complete['citycode'] = self.citycode
+        self.content_complete['groups'] = self.content_ordered
+
+    def create_content_complete(self):
+
+        # fonction qui lance le traitement
+        #
+        # et renvoie le dictionnaire correctement organisé
+
+        self.add_compare_element()
+        self.compare_groups()
+        self.add_municipality()
+        return self.content_complete
