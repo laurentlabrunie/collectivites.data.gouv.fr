@@ -284,20 +284,21 @@ ARTICLES_VALUES = [
 ]
 
 CHARS_TO_TRANSFORM_VALUES = {
-    'a' : ['à', 'ã', 'á', 'â'],
-    'e' : ['é', 'è', 'ê', 'ë'],
-    'i' : ['î', 'ï'],
-    'u' : ['ù', 'ü', 'û'],
-    'o' : ['ô', 'ö'],
-    ' ' : ["""'""", '-']
+    'a': ['à', 'ã', 'á', 'â'],
+    'e': ['é', 'è', 'ê', 'ë'],
+    'i': ['î', 'ï'],
+    'u': ['ù', 'ü', 'û'],
+    'o': ['ô', 'ö'],
+    ' ': ["""'""", '-']
 }
 
 SIZE_TYPEOF_STREET_VALUES = len(TYPEOF_STREET_VALUES)
-TYPEOF_STREET_WORDS_COUNT = [ x.count(" ") +1 for x in TYPEOF_STREET_VALUES ]
+TYPEOF_STREET_WORDS_COUNT = [x.count(" ") + 1 for x in TYPEOF_STREET_VALUES]
 
 # I to XXIII : ^[X]*(I{1,3}|[I]?V|V[I]{0,3}|[I]?X)$
 # all : '^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$'
 IS_ROMAN_NUMBER_RE = re.compile('^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$')
+
 
 def tr_accent_punctuation(text):
     """
@@ -310,6 +311,7 @@ def tr_accent_punctuation(text):
             text = text.replace(item, char)
     return text
 
+
 def split_as_listof_words(street):
     """
     split complete label as word(s)
@@ -317,6 +319,7 @@ def split_as_listof_words(street):
     :return: list of word(s)
     """
     return re.split('\s*', tr_accent_punctuation(street).upper())
+
 
 def guess_typeof_street(words):
     """
@@ -331,17 +334,18 @@ def guess_typeof_street(words):
     2- <tos> where word of tos is multiple (as PASSAGE, PASSAGE A NIVEAU) gives 1st, w/o searching more!
     '''
     t = len(words)
-    if t == 0 :
+    if t == 0:
         return None
     i = 0
-    while i < SIZE_TYPEOF_STREET_VALUES :
+    while i < SIZE_TYPEOF_STREET_VALUES:
         if TYPEOF_STREET_WORDS_COUNT[i] < t and \
-            " ".join(words[:TYPEOF_STREET_WORDS_COUNT[i]]) == TYPEOF_STREET_VALUES[i]:
+                        " ".join(words[:TYPEOF_STREET_WORDS_COUNT[i]]) == TYPEOF_STREET_VALUES[i]:
             return TYPEOF_STREET_VALUES[i]
         i += 1
 
     # w/o type of street
     return ''
+
 
 def is_roman_number(word):
     """
@@ -351,6 +355,7 @@ def is_roman_number(word):
     """
     roman = IS_ROMAN_NUMBER_RE.match(word)
     return (roman != None)
+
 
 def is_numeric(word):
     """
@@ -364,6 +369,7 @@ def is_numeric(word):
         return False
     return True
 
+
 def guess_strong_word(words):
     """
     evaluate strong word from splited words of label
@@ -371,17 +377,17 @@ def guess_strong_word(words):
     :return: strong word
     """
     i = len(words) - 1
-    if i < 0 :
+    if i < 0:
         return None
-    while i >= 0 :
+    while i >= 0:
         # not a roman number
         # not an arabic number
         # not an excluded word (LAPOSTE, IGN)
         # not an article
-        if not is_roman_number(words[i]) and not is_numeric(words[i]) :
+        if not is_roman_number(words[i]) and not is_numeric(words[i]):
             if words[i] not in STRONG_WORD_EXCLUDE_LAPOSTE and \
-                words[i] not in STRONG_WORD_EXCLUDE_IGN and \
-                words[i] not in ARTICLES_VALUES :
+                            words[i] not in STRONG_WORD_EXCLUDE_IGN and \
+                            words[i] not in ARTICLES_VALUES:
                 return words[i]
         i -= 1
 
@@ -390,8 +396,8 @@ def guess_strong_word(words):
 
 
 # for tests
-if __name__ == '__main__' :
-    while True :
+if __name__ == '__main__':
+    while True:
         street = input('\nEntrer la Voie: ')
         words = split_as_listof_words(street)
 
