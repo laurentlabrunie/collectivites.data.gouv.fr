@@ -191,3 +191,18 @@ Z.progress.prototype.remove = function () {
 Z.progress.prototype.clear = function () {
     this.el.removeAttribute('value');  // Switch to undeterminate state.
 }
+
+/* Redéfinition de customEvent dans le cas de navigateurs qui ne le gèrent pas (ie) */
+
+(function () {
+  function CustomEvent ( event, params ) {
+    params = params || { bubbles: false, cancelable: false, detail: undefined };
+    var evt = document.createEvent( 'CustomEvent' );
+    evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
+    return evt;
+   };
+
+  CustomEvent.prototype = window.Event.prototype;
+
+  window.CustomEvent = CustomEvent;
+})();
