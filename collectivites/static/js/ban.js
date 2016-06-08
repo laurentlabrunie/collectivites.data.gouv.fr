@@ -88,6 +88,7 @@ BAN.displaySelectorMunicipalityForDuplicate = function (selector1, selector2) {
         }
     });
     window.addEventListener('endOfLoad', function (e) {
+        Z.qs(selector2 + ' #message').innerHTML = "<h1>En cours de préparation<h1>";
         Z.qs(selector2 + ' #formGroups').submit();
     });
 }
@@ -140,7 +141,7 @@ BAN.banGroups = function (selector, url) {
 
 
 /* Affiche la liste des voies d'une commune et gère le fonctionnement du drag and drop */
-var groupListWithoutUlTmpl = '{{#each groups}}<li class="draggable {{class_children}}" id="{{id}}" data-father_id="{{father_id}}" >{{name}}</li>{{/each}}';
+var groupListWithoutUlTmpl = '{{#each groups}}<li class="draggable {{class_children}}" data-compare="{{data_to_compare}}" id="{{id}}" data-father_id="{{father_id}}" >{{name}}</li>{{/each}}';
 
 BAN.displayGroups = function(encodedGroups) {
 
@@ -173,5 +174,13 @@ BAN.displayGroups = function(encodedGroups) {
             put: true
             },
         sort: false,
+        onAdd: function(evt) {
+            var elt = evt.item;
+            var oldFather = evt.from.id;
+            var newFather = elt.parentElement.id;
+            if (newFather != oldFather) {
+                elt.classList.remove("children");
+                }
+            }
         });
 }

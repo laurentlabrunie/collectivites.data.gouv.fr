@@ -1,26 +1,29 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="row mwide twide">
-    <div class="col wide">
-        <h2 id="pagetitle"></h2>
-        <div id="groups" style="margin-left: 30px;">
-            <div class="block__list-title" >
-                Liste des voies et leurs doublons
-            </div>
-            <ul id="list">
-            </ul>
+<h2 id="pagetitle"></h2>
 
-            <div class="block__list-title">
-                Voies sélectionnées
-            </div>
-            <ul id="select">
-                <input type="text" placeholder="nom de la voie" />
-                <input type="button" value="OK"/>
-            </ul>
+<div id="groups" class="reliability_container">
+    <div class="block__list">
+        <div class="block__list-title" >
+            Voies de la commune et alertes
+        </div>
+        <ul class="block__list-content" id="list">
+        </ul>
+    </div>
+    <div class="block__list" title="Pour une même voie, rajouter les doublons identifiées et sélectionner ou rajouter le bon nom de voie">
+        <div class="block__list-title">
+            Sas de fiabilisation
+        </div>
+        <ul class="block__list-content" id="select">
+        </ul>
+        <div class="block_end">
+            <input type="text" placeholder="nom de la voie" />
+            <input type="button" value="OK"/>
         </div>
     </div>
 </div>
+
 
 <script>
     BAN.displayGroups("{{ groups }}");

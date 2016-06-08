@@ -9,6 +9,7 @@ from werkzeug import security
 
 from . import app
 from . import utils
+from . import addr_utils
 
 
 @app.route('/')
@@ -168,7 +169,7 @@ def ban_reliability():
 
 class MakeGroupList:
 
-    # travaille la liste d'origine et génère une liste où sont identifiés les doublons
+    """ travaille la liste d'origine et génère une liste où sont identifiés les doublons """
 
     def __init__(self, list_content):
         self.municipality = list_content['name']
@@ -179,21 +180,24 @@ class MakeGroupList:
 
     def add_compare_element(self):
 
-        # prépare les données à comparer
-        #
-        # (non finalisé pour l'instant)
+        """ prépare les données à comparer
+
+         (non finalisé pour l'instant) """
 
         for group in self.list_groups:
-            group['data_to_compare'] = group['name']
+            words = addr_utils.split_as_listof_words(group['name'])
+            tos = addr_utils.guess_typeof_street(words)
+            sw = addr_utils.guess_strong_word(words)
+            group['data_to_compare'] = tos + sw
 
     def compare_groups(self):
 
-        # compare les voies et génère une nouvelle liste où sont identifiés les différents doublons potentiels :
-        #   pour chaque voie étudiée dans la première liste,
-        #   on la copie d'abord dans la seconde liste
-        #   puis on la supprime dans la première
+        """ compare les voies et génère une nouvelle liste où sont identifiés les différents doublons potentiels :
+           pour chaque voie étudiée dans la première liste,
+           on la copie d'abord dans la seconde liste
+           puis on la supprime dans la première
 
-        #   Et c'est ensuite que l'on fait la comparaison...
+           Et c'est ensuite que l'on fait la comparaison... """
 
         while len(self.list_groups) != 0:
             father_id = self.list_groups[0]['id']
@@ -203,10 +207,10 @@ class MakeGroupList:
 
     def compare_one_group_to_others(self, father_id):
 
-        # ...compare la dernière voie de la seconde liste avec toutes les autres voies de la première
-        #   et identifie les doublons...
+        """ ...compare la dernière voie de la seconde liste avec toutes les autres voies de la première
+           et identifie les doublons...
 
-        #   ...puis copie ces doublons à la suite de la voie comparée, et les supprime dans la première liste.
+           ...puis copie ces doublons à la suite de la voie comparée, et les supprime dans la première liste. """
 
         index_group = 0
         nb_group = len(self.list_groups)
@@ -224,7 +228,7 @@ class MakeGroupList:
 
     def add_municipality(self):
 
-        # met en forme le dictionnaire avec les données à faire passer en plus des voies
+        """ met en forme le dictionnaire avec les données à faire passer en plus des voies """
 
         self.content_complete['name'] = self.municipality
         self.content_complete['citycode'] = self.citycode
@@ -232,9 +236,9 @@ class MakeGroupList:
 
     def create_content_complete(self):
 
-        # fonction qui lance le traitement
-        #
-        # et renvoie le dictionnaire correctement organisé
+        """ fonction qui lance le traitement
+
+         et renvoie le dictionnaire correctement organisé """
 
         self.add_compare_element()
         self.compare_groups()
