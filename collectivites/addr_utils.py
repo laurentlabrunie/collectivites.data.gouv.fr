@@ -297,8 +297,14 @@ TYPEOF_STREET_WORDS_COUNT = [x.count(" ") + 1 for x in TYPEOF_STREET_VALUES]
 
 # I to XXIII : ^[X]*(I{1,3}|[I]?V|V[I]{0,3}|[I]?X)$
 # all : '^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$'
-IS_ROMAN_NUMBER_RE = re.compile('^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$')
+IS_ROMAN_NUMBER_RE = re.compile(r'^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$')
+IS_WELL_CAPITALIZE_RE = re.compile(r'^(?:[A-Z][a-z]*[- \']?)$')
+IS_ONLY_UPPERCASE_RE = re.compile(r'^[- \'A-Z]*$')
+IS_WITH_REPETITION_RE = re.compile(r'(?P<word>\w+)\W+(?P=word)', re.I)
 
+LABEL_ONLY_UPPERCASE_ERROR = 1
+LABEL_BAD_CAPITALIZE_ERROR = 2
+LABEL_WITH_REPETITION_ERROR = 4
 
 def tr_accent_punctuation(text):
     """
@@ -323,24 +329,31 @@ def split_as_listof_words(street):
 
 def guess_typeof_street(words):
     """
-    identify type of street from splited words of label
+    identify type of street (tos) from splited words of label
     :param words: list of word(s)
     :return: type of street
     """
 
     '''
     bugs:
-    1- <tos> <exlcude_word> gives <tos> instead of 2nd
-    2- <tos> where word of tos is multiple (as PASSAGE, PASSAGE A NIVEAU) gives 1st, w/o searching more!
+    1- <tos> <exclude_word> gives <tos> instead of <exclude_word>
     '''
     t = len(words)
     if t == 0:
         return None
     i = 0
     while i < SIZE_TYPEOF_STREET_VALUES:
-        if TYPEOF_STREET_WORDS_COUNT[i] < t and \
-                        " ".join(words[:TYPEOF_STREET_WORDS_COUNT[i]]) == TYPEOF_STREET_VALUES[i]:
-            return TYPEOF_STREET_VALUES[i]
+        if TYPEOF_STREET_WORDS_COUNT[i] < t:
+            if words[0] in ("CHEMIN", "ZONE", "PASSAGE"):
+                w = [(s, TYPEOF_STREET_VALUES.index(s)) for s in TYPEOF_STREET_VALUES if s.startswith(words[0])]
+                ws = sorted(w, key=lambda x: TYPEOF_STREET_WORDS_COUNT[x[1]], reverse=True)
+                for tos, id in ws:
+                    if " ".join(words[:TYPEOF_STREET_WORDS_COUNT[id]]) == tos:
+                        return tos
+            else:
+                if " ".join(words[:TYPEOF_STREET_WORDS_COUNT[i]]) == TYPEOF_STREET_VALUES[i]:
+                    return TYPEOF_STREET_VALUES[i]
+
         i += 1
 
     # w/o type of street
@@ -395,6 +408,37 @@ def guess_strong_word(words):
     return words[-1]
 
 
+def guess_stateof_label(street):
+    """
+    evaluate state of label (suspicious errors)
+    :param street: complete label
+    :return: bitstream
+    """
+    rc = 0
+
+    # only w/ uppercase?
+    ouc = IS_ONLY_UPPERCASE_RE.match(street)
+    if (ouc != None):
+        rc = rc | LABEL_ONLY_UPPERCASE_ERROR
+    else:
+        # each word well capitalized?
+        words = re.split('[- \']', street)
+        for w in words:
+            if w.upper() not in ARTICLES_VALUES and not is_roman_number(w) and not is_numeric(w):
+                wc = IS_WELL_CAPITALIZE_RE.match(w)
+                if (wc == None):
+                    rc = rc | LABEL_BAD_CAPITALIZE_ERROR
+                    break
+
+    # w/ duplicate successive word?
+    dup = IS_WITH_REPETITION_RE.search(street)
+    if (dup != None):
+        rc = rc | LABEL_WITH_REPETITION_ERROR
+
+    return rc
+
+
+
 # for tests
 if __name__ == '__main__':
     while True:
@@ -406,3 +450,13 @@ if __name__ == '__main__':
 
         sw = guess_strong_word(words)
         print(' mot important de la Voie : ' + sw)
+
+        sl = guess_stateof_label(street)
+        if (sl & LABEL_ONLY_UPPERCASE_ERROR == LABEL_ONLY_UPPERCASE_ERROR):
+            print(' en majuscule seulement!')
+        if (sl & LABEL_BAD_CAPITALIZE_ERROR == LABEL_BAD_CAPITALIZE_ERROR):
+            print(' non correctement capitalisé!')
+        if (sl & LABEL_WITH_REPETITION_ERROR == LABEL_WITH_REPETITION_ERROR):
+            print(' avec redondance de libellé!')
+
+
