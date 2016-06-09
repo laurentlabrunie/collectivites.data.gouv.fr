@@ -141,7 +141,16 @@ BAN.banGroups = function (selector, url) {
 
 
 /* Affiche la liste des voies d'une commune et gère le fonctionnement du drag and drop */
-var groupListWithoutUlTmpl = '{{#each groups}}<li class="draggable {{class_children}}" data-compare="{{data_to_compare}}" id="{{id}}" data-father_id="{{father_id}}" >{{name}}</li>{{/each}}';
+
+var groupIconAfter = '<i class="glyphicon glyphicon-pencil"></i><i class="glyphicon glyphicon-remove"></i>'
+        + '<i class="glyphicon glyphicon-hand-right"></i>';
+
+var groupIconBefore = '<i class="glyphicon glyphicon-hand-left"></i> ';
+
+var groupListWithoutUlTmpl = '{{#each groups}}<li class="draggable {{class_children}}" '
+        + 'data-compare="{{data_to_compare}}" id="{{id}}" data-father_id="{{father_id}}" data-value="{{name}}" >'
+        + '<div class="groupname">{{# if class_children}}<i class="glyphicon glyphicon-triangle-right"></i>{{/if}}{{name}}</div>'
+        + '<div class="groupiconafter">' + groupIconAfter + '</div></li>{{/each}}';
 
 BAN.displayGroups = function(encodedGroups) {
 
@@ -151,7 +160,8 @@ BAN.displayGroups = function(encodedGroups) {
     var citycode = JSON.parse(JSONgroups).citycode;
     var groups = JSON.parse(JSONgroups).groups;
 
-    Z.qs("#pagetitle").innerHTML = 'Fiabiliser les noms de voies dans la BAN pour la commune de ' + municipality + ' (' + citycode + ')';
+    Z.qs("#pagetitle").innerHTML = 'Fiabiliser les noms de voies dans la BAN pour la commune de ' + municipality
+            + ' (' + citycode + ')';
 
     var list = document.getElementById('list');
     var listSort = Sortable.create(list, {
@@ -162,6 +172,15 @@ BAN.displayGroups = function(encodedGroups) {
             },
         draggable: '.draggable',
         sort: false,
+        onAdd: function(evt) {
+            var elt = evt.item;
+            var oldFather = evt.from.id;
+            var newFather = elt.parentElement.id;
+            if (newFather != oldFather) {
+                elt.childNodes[0].innerHTML = elt.dataset['value'];
+                elt.childNodes[1].innerHTML = groupIconAfter;
+                }
+            }
         });
 
     list.innerHTML = Handlebars.compile(groupListWithoutUlTmpl)({ groups: groups });
@@ -176,10 +195,13 @@ BAN.displayGroups = function(encodedGroups) {
         sort: false,
         onAdd: function(evt) {
             var elt = evt.item;
+            console.log(elt);
             var oldFather = evt.from.id;
             var newFather = elt.parentElement.id;
             if (newFather != oldFather) {
                 elt.classList.remove("children");
+                elt.childNodes[0].innerHTML = groupIconBefore + elt.dataset['value'];
+                elt.childNodes[1].innerHTML = '';
                 }
             }
         });
