@@ -1,0 +1,17 @@
+{% extends "helper/popin.html" %}
+
+{% set popId = "pop_groups" %}
+{% set parentDisableClass = "parent_disable_groups" %}
+{% set popinClass = "popin_groups" %}
+{% set idTitle = "Modification du libellé de la voie" %}
+
+{% block popinContent %}
+    <form method="post" >
+        <div class="block_info"  id="" >
+        </div>
+        <div class="block_modif">
+                <input type="text" placeholder="" id="group_name_new" />
+                <input type="button" onclick="return POPIN.updateAndHide('{{popId}}', this)" value="Modifier"/>
+        </div>
+    </form>
+{% endblock%}

@@ -8,10 +8,9 @@
     width: 45%;
     margin: auto;
     height: 600px
-
 }
 
-.block__list-title {
+.block__list-title h4{
     text-align: center;
     border-radius:10px 10px;
     line-height:50px;
@@ -59,8 +58,8 @@
     border-radius:5px 5px;
 }
 
-.block__list-content .groupiconafter .glyphicon:hover,
-.block__list-content .groupname .glyphicon-hand-left:hover {
+.groupiconafter .glyphicon,
+.glyphicon-hand-left {
     cursor: pointer;
 }
 
@@ -69,7 +68,13 @@
     border-style: inset;
 }
 
-.block__list-content .glyphicon-triangle-right{
+.glyphicon-warning-sign,
+.glyphicon-info-sign {
+    cursor: help;
+}
+
+.block__list-content .children{
+    margin-left: 20px;
 }
 
 #list {
@@ -83,7 +88,6 @@
 .block_end {
     height:10%;
     text-align: center;
-
 }
 
 .block_end input[type="text"] {
