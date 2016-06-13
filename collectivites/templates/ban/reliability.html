@@ -6,14 +6,15 @@
 <div id="groups" class="reliability_container">
     <div class="block__list">
         <div class="block__list-title" >
-            Voies de la commune et alertes
+            <h4>Voies de la commune et alertes</h4>
         </div>
         <ul class="block__list-content" id="list">
         </ul>
     </div>
-    <div class="block__list" title="Pour une même voie, rajouter les doublons identifiées et sélectionner ou rajouter le bon nom de voie">
+    <div class="block__list">
         <div class="block__list-title">
-            Sas de fiabilisation
+            <h4>Sas de fiabilisation <span class="glyphicon glyphicon-info-sign"
+                    title="Pour une même voie, rajouter les doublons identifiés et sélectionner le bon libellé ou celui qui correspond à la bonne voie et renseigner le libellé correctement"</h4>
         </div>
         <ul class="block__list-content" id="select">
         </ul>
@@ -24,8 +25,10 @@
     </div>
 </div>
 
+{% include 'helper/popingroups.html' %}
 
 <script>
     BAN.displayGroups("{{ groups }}");
+
 </script>
 {% endblock content %}

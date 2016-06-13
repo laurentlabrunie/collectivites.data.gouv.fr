@@ -8,10 +8,9 @@
     width: 45%;
     margin: auto;
     height: 600px
-
 }
 
-.block__list-title {
+.block__list-title h4{
     text-align: center;
     border-radius:10px 10px;
     line-height:50px;
@@ -25,9 +24,10 @@
 }
 
 .block__list-content li{
-    background: #D19EA2;
+    display:flex;
+    background: #A2BBD6;
     background-image:linear-gradient(15deg, #A2BBD6, white, #D19EA2);
-    border-radius:10px 10px;
+    border-radius:10px 10px 10px 10px;
     padding: 0px 5px;
     margin: 5px;
 }
@@ -42,8 +42,39 @@
     cursor: -Moz-Grabbing;
 }
 
+.block__list-content .groupname {
+    width:75%;
+}
+
+.block__list-content .groupiconafter {
+    width:25%;
+}
+
+.block__list-content .groupiconafter .glyphicon,
+.block__list-content .groupname .glyphicon-hand-left {
+    border-width: 1px;
+    padding: 5px;
+    border-style: outset;
+    border-radius:5px 5px;
+}
+
+.groupiconafter .glyphicon,
+.glyphicon-hand-left {
+    cursor: pointer;
+}
+
+.block__list-content .groupiconafter .glyphicon:active,
+.block__list-content .groupname .glyphicon-hand-left:active {
+    border-style: inset;
+}
+
+.glyphicon-warning-sign,
+.glyphicon-info-sign {
+    cursor: help;
+}
+
 .block__list-content .children{
-    margin-left: 50px;
+    margin-left: 20px;
 }
 
 #list {
@@ -57,7 +88,6 @@
 .block_end {
     height:10%;
     text-align: center;
-
 }
 
 .block_end input[type="text"] {
@@ -77,3 +107,4 @@
     background: #A2BBD6;
     background-image:radial-gradient(#D19EA2, white, #A2BBD6);
 }
+

@@ -189,6 +189,28 @@ class MakeGroupList:
             tos = addr_utils.guess_typeof_street(words)
             sw = addr_utils.guess_strong_word(words)
             group['data_to_compare'] = tos + sw
+            sl = addr_utils.guess_stateof_label(group['name'])
+            group['message_alert'] = self.construction_message(sl)
+
+    def construction_message(self, bitstream):
+
+        """ """
+
+        message_alert = ''
+
+        message_content = {
+            addr_utils.LABEL_ONLY_UPPERCASE_ERROR: 'Tous les caractères sont en majuscule',
+            addr_utils.LABEL_BAD_CAPITALIZE_ERROR: 'Des caractères sont mal capitalisés',
+            addr_utils.LABEL_WITH_REPETITION_ERROR: 'Des mots sont en double'
+        }
+
+        if bitstream != 0:
+            message_alert = 'Mauvais libellé :'
+            for key, value in message_content.items():
+                if bitstream & key == key:
+                    message_alert = message_alert + '\n - ' + value
+
+        return message_alert
 
     def compare_groups(self):
 
@@ -218,6 +240,7 @@ class MakeGroupList:
         while nb_group > index_group:
             if self.list_groups[index_group]['data_to_compare'] \
                     == self.content_ordered[index_last_ordered]['data_to_compare']:
+                self.content_ordered[index_last_ordered]['class_father'] = 'father'
                 self.list_groups[index_group]['father_id'] = father_id
                 self.list_groups[index_group]['class_children'] = 'children'
                 self.content_ordered.append(self.list_groups[index_group])

@@ -114,7 +114,7 @@ BAN.listGroupsComplete = function (selector, municipality) {
 
     citycode = citycode || '01001';
 
-    var uriComplete = uriGroup + '/municipality/insee:' + citycode + '/groups';
+    var uriComplete = uriGroup + '/municipality/insee:' + citycode + '/groups?limit=10000';
 
     BAN.banGroups(selector, uriComplete);
 }
@@ -139,9 +139,35 @@ BAN.banGroups = function (selector, url) {
             }});
     }
 
-
 /* Affiche la liste des voies d'une commune et gère le fonctionnement du drag and drop */
-var groupListWithoutUlTmpl = '{{#each groups}}<li class="draggable {{class_children}}" data-compare="{{data_to_compare}}" id="{{id}}" data-father_id="{{father_id}}" >{{name}}</li>{{/each}}';
+
+var listIcones = {
+    'edit': 'glyphicon glyphicon-pencil',
+    'remove': 'glyphicon glyphicon-trash',
+    'gotoright': 'glyphicon glyphicon-hand-right',
+    'gotoleft': 'glyphicon glyphicon-hand-left',
+    'children': 'glyphicon glyphicon-chevron-right',
+    'father': ' glyphicon glyphicon-chevron-down',
+    'warning': 'glyphicon glyphicon-warning-sign',
+    'close': 'glyphicon glyphicon-remove'
+}
+
+var groupIconAfter = '<a href="#" onClick="return POPIN.popForGroups(\'pop_groups\', this)">'
+                + '<i class="' + listIcones['edit'] + '" title="Modifier le libellé de la voie"></i>'
+        +'</a>'
+        + '<i class="' + listIcones['remove'] + '" title="Supprimer la voie"></i>'
+        + '<i class="' + listIcones['gotoright'] + '" title="Déplacer dans le sas de fiabilisation"></i>';
+
+var groupIconBefore = '<i class="' + listIcones['gotoleft'] + '"></i> ';
+
+var groupListWithoutUlTmpl = '{{#each groups}}<li class="draggable {{class_children}} {{class_father}}" '
+        + 'data-compare="{{data_to_compare}}" id="{{id}}" '
+        + 'data-father_id="{{father_id}}" data-value="{{name}}" >'
+        + '<div class="groupname">{{# if class_children}}<i class="' + listIcones['children'] + '"></i>{{/if}}'
+        + '{{# if class_father}}<i class="' + listIcones['father'] + '"></i>{{/if}}'
+        + '{{# if message_alert}}<i class="' + listIcones['warning'] + '" '
+        + 'title="{{message_alert}}"></i>{{/if}} <span>{{name}}</span></div>'
+        + '<div class="groupiconafter">' + groupIconAfter + '</div></li>{{/each}}';
 
 BAN.displayGroups = function(encodedGroups) {
 
@@ -151,7 +177,8 @@ BAN.displayGroups = function(encodedGroups) {
     var citycode = JSON.parse(JSONgroups).citycode;
     var groups = JSON.parse(JSONgroups).groups;
 
-    Z.qs("#pagetitle").innerHTML = 'Fiabiliser les noms de voies dans la BAN pour la commune de ' + municipality + ' (' + citycode + ')';
+    Z.qs("#pagetitle").innerHTML = 'Fiabiliser les noms de voies dans la BAN pour la commune de ' + municipality
+            + ' (' + citycode + ')';
 
     var list = document.getElementById('list');
     var listSort = Sortable.create(list, {
@@ -162,6 +189,15 @@ BAN.displayGroups = function(encodedGroups) {
             },
         draggable: '.draggable',
         sort: false,
+        onAdd: function(evt) {
+            var elt = evt.item;
+            var oldFather = evt.from.id;
+            var newFather = elt.parentElement.id;
+            if (newFather != oldFather) {
+                elt.childNodes[0].innerHTML = elt.childNodes[0].innerHTML.replace(groupIconBefore, '');
+                elt.childNodes[1].innerHTML = groupIconAfter;
+                }
+            }
         });
 
     list.innerHTML = Handlebars.compile(groupListWithoutUlTmpl)({ groups: groups });
@@ -180,6 +216,11 @@ BAN.displayGroups = function(encodedGroups) {
             var newFather = elt.parentElement.id;
             if (newFather != oldFather) {
                 elt.classList.remove("children");
+                elt.classList.remove("father");
+                elt.childNodes[0].innerHTML = groupIconBefore + elt.childNodes[0].innerHTML
+                        .replace('<i class="' + listIcones['father'] + '"></i>', '')
+                        .replace('<i class="' + listIcones['children'] + '"></i>', '');
+                elt.childNodes[1].innerHTML = '';
                 }
             }
         });
