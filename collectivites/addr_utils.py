@@ -1,7 +1,5 @@
 from unidecode import unidecode
 import re
-import sys
-import locale
 
 '''
 library to expose useful methods for address like
@@ -12,13 +10,17 @@ library to expose useful methods for address like
         evaluate strong word (from its label, splited as words)
 '''
 
+# I to XXIII : ^[X]*(I{1,3}|[I]?V|V[I]{0,3}|[I]?X)$
+# all : '^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$'
+IS_ROMAN_NUMBER_RE = re.compile(r'^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$', re.I)
+
 def is_roman_number(word):
     """
     determine if given word is a roman number
     :param word:
     :return: boolean result
     """
-    roman = AddrGroup.IS_ROMAN_NUMBER_RE.match(word)
+    roman = IS_ROMAN_NUMBER_RE.match(word)
     return (roman != None)
 
 
@@ -317,9 +319,6 @@ class AddrGroup:
     # eval number of word(s) for each
     TYPEOF_STREET_WORDS_COUNT = [x.count(" ") + 1 for x in TYPEOF_STREET_VALUES]
 
-    # I to XXIII : ^[X]*(I{1,3}|[I]?V|V[I]{0,3}|[I]?X)$
-    # all : '^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$'
-    IS_ROMAN_NUMBER_RE = re.compile(r'^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$')
     IS_WELL_CAPITALIZE_RE = re.compile(r'^(?:[A-Z][a-z]*[- \']?)$')
     IS_ONLY_UPPERCASE_RE = re.compile(r'^[- \'A-Z]*$')
     IS_WITH_REPETITION_RE = re.compile(r'(?P<word>\w+)\W+(?P=word)', re.I)
@@ -332,6 +331,7 @@ class AddrGroup:
 
     def __init__(self, label, evalDescriptor=False):
         self.label = label
+        # split as word(s), transforming accents (unidecode)
         self._words = self.SPLIT_LABEL_AS_WORD_RE.findall(unidecode(self.label))
         self._wordsUpper = list(map(lambda x: x.upper(), self._words))
 
@@ -372,7 +372,7 @@ class AddrGroup:
             if self.TYPEOF_STREET_WORDS_COUNT[i] >= t:
                 continue
 
-            # multiple tos w/ the same 1st word
+            # multiple tos w/ the same 1st word, search them starting w/ longest (loop w/ desc order)
             if self._wordsUpper[0] in ("CHEMIN", "ZONE", "PASSAGE"):
                 w = [(s, self.TYPEOF_STREET_VALUES.index(s)) for s in self.TYPEOF_STREET_VALUES
                         if s.startswith(self._wordsUpper[0])]
@@ -381,11 +381,12 @@ class AddrGroup:
                     if " ".join(self._wordsUpper[:self.TYPEOF_STREET_WORDS_COUNT[id]]) == tos:
                         return tos
             else:
-                if " ".join(self._wordsUpper[:self.TYPEOF_STREET_WORDS_COUNT[i]]) == self.TYPEOF_STREET_VALUES[i]:
-                    return self.TYPEOF_STREET_VALUES[i]
+                if " ".join(self._wordsUpper[:self.TYPEOF_STREET_WORDS_COUNT[i]]) == kw:
+                    return kw
 
         # w/o type of street
         return ''
+
 
     def _guess_stateof_label(self):
         """
@@ -397,7 +398,7 @@ class AddrGroup:
         # only w/ uppercase?
         ouc = self.IS_ONLY_UPPERCASE_RE.match(self.label)
         if (ouc != None):
-            rc = rc | self.LABEL_ONLY_UPPERCASE_ERROR
+            rc |= self.LABEL_ONLY_UPPERCASE_ERROR
         else:
             # each word well capitalized?
             for w in self._words:
@@ -405,13 +406,13 @@ class AddrGroup:
                     continue
                 wc = self.IS_WELL_CAPITALIZE_RE.match(w)
                 if (wc == None):
-                    rc = rc | self.LABEL_BAD_CAPITALIZE_ERROR
+                    rc |= self.LABEL_BAD_CAPITALIZE_ERROR
                     break
 
         # w/ duplicate successive word?
         dup = self.IS_WITH_REPETITION_RE.search(street)
         if (dup != None):
-            rc = rc | self.LABEL_WITH_REPETITION_ERROR
+            rc |= self.LABEL_WITH_REPETITION_ERROR
 
         return rc
 
