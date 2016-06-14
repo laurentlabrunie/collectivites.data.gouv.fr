@@ -1,0 +1,17 @@
+{% extends "helper/popin.html" %}
+
+{% set popId = "rem_groups" %}
+{% set parentDisableClass = "parent_disable_groups" %}
+{% set popinClass = "popin_remove_groups" %}
+{% set idTitle = "Suppression de la voie" %}
+
+{% block popinContent %}
+    <form method="post" >
+        <div class="block_info"  id="" >
+        </div>
+        <div class="block_modif">
+                <input type="button" onclick="return POPIN.removeAndHide('{{popId}}', this)" value="Supprimer"/>
+                <input type="button" onclick="return POPIN.hide('{{popId}}', this)" value="Annuler"/>
+        </div>
+    </form>
+{% endblock%}

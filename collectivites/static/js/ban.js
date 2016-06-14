@@ -96,7 +96,8 @@ BAN.displaySelectorMunicipalityForDuplicate = function (selector1, selector2) {
 /* Récupère la liste totale des voies pour une commune à partir du numéro insee
         et la met en session sous forme JSON */
 
-var uriGroup = 'http://ban-dev.data.gouv.fr';
+//var uriGroup = 'http://ban-dev.data.gouv.fr';
+var uriGroup = 'http://localhost:5959';
 var event = new CustomEvent('endOfLoad');
 var groupsJSONToArray = [];
 var groupsMunicipalityArray = [];
@@ -147,30 +148,35 @@ var listIcones = {
     'gotoright': 'glyphicon glyphicon-hand-right',
     'gotoleft': 'glyphicon glyphicon-hand-left',
     'children': 'glyphicon glyphicon-chevron-right',
-    'father': ' glyphicon glyphicon-chevron-down',
+    'parent': 'glyphicon glyphicon-chevron-down',
     'warning': 'glyphicon glyphicon-warning-sign',
     'close': 'glyphicon glyphicon-remove'
 }
 
-var groupIconAfter = '<a href="#" onClick="return POPIN.popForGroups(\'pop_groups\', this)">'
-                + '<i class="' + listIcones['edit'] + '" title="Modifier le libellé de la voie"></i>'
-        +'</a>'
-        + '<i class="' + listIcones['remove'] + '" title="Supprimer la voie"></i>'
-        + '<i class="' + listIcones['gotoright'] + '" title="Déplacer dans le sas de fiabilisation"></i>';
+var groupIconAfter = '<a href="#" onClick="return POPIN.popUpdateForGroups(\'mod_groups\', this)">'
+        +   '<i class="' + listIcones['edit'] + '" title="Modifier le libellé de la voie"></i>'
+        + '</a>'
+        + '<a href="#" onClick="return POPIN.popRemoveForGroups(\'rem_groups\', this)">'
+        +   '<i class="' + listIcones['remove'] + '" title="Supprimer la voie"></i>'
+        + '</a>'
+        + '<a href="#" onClick="BAN.moveIn(this, \'#select\')">'
+        +   '<i class="' + listIcones['gotoright'] + '" title="Déplacer dans le sas de fiabilisation"></i>'
+        + '</a>';
 
-var groupIconBefore = '<i class="' + listIcones['gotoleft'] + '"></i> ';
+var groupIconBefore = '<a href="#" onClick="BAN.moveIn(this, \'#list\')">'
+        +   '<i class="' + listIcones['gotoleft'] + '" title="Déplacer dans la liste des voies"></i>'
+        + '</a>';
 
-var groupListWithoutUlTmpl = '{{#each groups}}<li class="draggable {{class_children}} {{class_father}}" '
+var groupListWithoutUlTmpl = '{{#each groups}}<li class="draggable {{class_children}} {{class_parent}}" '
         + 'data-compare="{{data_to_compare}}" id="{{id}}" '
-        + 'data-father_id="{{father_id}}" data-value="{{name}}" >'
+        + 'data-parent_id="{{parent_id}}" data-value="{{name}}" >'
         + '<div class="groupname">{{# if class_children}}<i class="' + listIcones['children'] + '"></i>{{/if}}'
-        + '{{# if class_father}}<i class="' + listIcones['father'] + '"></i>{{/if}}'
+        + '{{# if class_parent}}<i class="' + listIcones['parent'] + '"></i>{{/if}}'
         + '{{# if message_alert}}<i class="' + listIcones['warning'] + '" '
         + 'title="{{message_alert}}"></i>{{/if}} <span>{{name}}</span></div>'
         + '<div class="groupiconafter">' + groupIconAfter + '</div></li>{{/each}}';
 
 BAN.displayGroups = function(encodedGroups) {
-
     var JSONgroups = decodeURIComponent(encodedGroups);
 
     var municipality = JSON.parse(JSONgroups).name;
@@ -191,11 +197,10 @@ BAN.displayGroups = function(encodedGroups) {
         sort: false,
         onAdd: function(evt) {
             var elt = evt.item;
-            var oldFather = evt.from.id;
-            var newFather = elt.parentElement.id;
-            if (newFather != oldFather) {
-                elt.childNodes[0].innerHTML = elt.childNodes[0].innerHTML.replace(groupIconBefore, '');
-                elt.childNodes[1].innerHTML = groupIconAfter;
+            var oldParent = evt.from.id;
+            var newParent = elt.parentElement.id;
+            if (newParent != oldParent) {
+                BAN.iconeManagement(elt, newParent);
                 }
             }
         });
@@ -212,16 +217,36 @@ BAN.displayGroups = function(encodedGroups) {
         sort: false,
         onAdd: function(evt) {
             var elt = evt.item;
-            var oldFather = evt.from.id;
-            var newFather = elt.parentElement.id;
-            if (newFather != oldFather) {
-                elt.classList.remove("children");
-                elt.classList.remove("father");
-                elt.childNodes[0].innerHTML = groupIconBefore + elt.childNodes[0].innerHTML
-                        .replace('<i class="' + listIcones['father'] + '"></i>', '')
-                        .replace('<i class="' + listIcones['children'] + '"></i>', '');
-                elt.childNodes[1].innerHTML = '';
+            var oldParent = evt.from.id;
+            var newParent = elt.parentElement.id;
+            if (newParent != oldParent) {
+                BAN.iconeManagement(elt, newParent);
                 }
             }
         });
+}
+
+BAN.moveIn = function(element, idWhere) {
+    var eltToMove = Z.parents('LI', element);
+    BAN.iconeManagement(eltToMove, idWhere)
+    var eltWhere = Z.qs(idWhere);
+    eltWhere.appendChild(eltToMove);
+}
+
+BAN.iconeManagement = function(eltToMove, idWhere) {
+    idWhere = idWhere.replace ('#','');
+    switch(idWhere) {
+        case 'select':
+            eltToMove.classList.remove("children");
+            eltToMove.classList.remove("parent");
+            eltToMove.childNodes[0].innerHTML = groupIconBefore + eltToMove.childNodes[0].innerHTML
+                    .replace('<i class="' + listIcones['parent'] + '"></i>', '')
+                    .replace('<i class="' + listIcones['children'] + '"></i>', '');
+            eltToMove.childNodes[1].innerHTML = '';
+            break;
+        case 'list':
+            eltToMove.childNodes[0].removeChild(eltToMove.childNodes[0].firstChild);
+            eltToMove.childNodes[1].innerHTML = groupIconAfter;
+            break;
+    }
 }

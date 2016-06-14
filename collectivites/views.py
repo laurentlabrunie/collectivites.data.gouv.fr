@@ -222,12 +222,12 @@ class MakeGroupList:
            Et c'est ensuite que l'on fait la comparaison... """
 
         while len(self.list_groups) != 0:
-            father_id = self.list_groups[0]['id']
+            parent_id = self.list_groups[0]['id']
             self.content_ordered.append(self.list_groups[0])
             del self.list_groups[0]
-            self.compare_one_group_to_others(father_id)
+            self.compare_one_group_to_others(parent_id)
 
-    def compare_one_group_to_others(self, father_id):
+    def compare_one_group_to_others(self, parent_id):
 
         """ ...compare la dernière voie de la seconde liste avec toutes les autres voies de la première
            et identifie les doublons...
@@ -240,8 +240,8 @@ class MakeGroupList:
         while nb_group > index_group:
             if self.list_groups[index_group]['data_to_compare'] \
                     == self.content_ordered[index_last_ordered]['data_to_compare']:
-                self.content_ordered[index_last_ordered]['class_father'] = 'father'
-                self.list_groups[index_group]['father_id'] = father_id
+                self.content_ordered[index_last_ordered]['class_parent'] = 'parent'
+                self.list_groups[index_group]['parent_id'] = parent_id
                 self.list_groups[index_group]['class_children'] = 'children'
                 self.content_ordered.append(self.list_groups[index_group])
                 del self.list_groups[index_group]

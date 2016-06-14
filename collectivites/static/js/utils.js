@@ -12,6 +12,16 @@ var Z = {
         return element.querySelectorAll(selector);
     },
 
+    // permet de retrouver le premier parent de l'élément correspondant au type d'élément demandé
+    // selector: type d'élément ("UL", "LI", "DIV"...)
+    // element: élément de départ de la recherche
+    parents: function(selector, element) {
+        var parent = element.parentElement;
+        if (parent.nodeName.toUpperCase() == selector.toUpperCase()) return parent;
+        else if (element != document.body) return Z.parents(selector, parent);
+        else console.error('Pas de parent correspondant au "' + selector + '"');
+    },
+
     el: function (what, attrs, parent, content) {
         var el = document.createElement(what);
         for (var attr in attrs || {}) el[attr] = attrs[attr];
