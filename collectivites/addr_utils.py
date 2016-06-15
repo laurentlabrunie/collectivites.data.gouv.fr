@@ -410,7 +410,7 @@ class AddrGroup:
                     break
 
         # w/ duplicate successive word?
-        dup = self.IS_WITH_REPETITION_RE.search(street)
+        dup = self.IS_WITH_REPETITION_RE.search(self.label)
         if (dup != None):
             rc |= self.LABEL_WITH_REPETITION_ERROR
 

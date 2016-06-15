@@ -28,7 +28,14 @@ POPIN.popRemoveForGroups = function(div, object) {
 POPIN.updateAndHide = function(div, object) {
 
     eltId = Z.qs('.popin_update_groups .block_info').id;
+    eltTo = Z.qs('#list #' + eltId);
+    eltFrom = Z.qs('#group_name_new');
+    if (eltFrom.value == "") {
+        alert('Le libellé ne doit pas être vide. Veuillez renseigner le bon libellé.');
+        return;
+        }
 
+    if (eltTo.dataset.value != eltFrom.value) {
     // TODO: ne modifie que l'affichage : optimiser lors de l'accès à la base
     // TODO: Faudra vérifier si la nouvelle valeur est conforme (avertissement si ce n'est pas le cas),
     // TODO: mettre à jour la base puis récupérer la nouvelle valeur en base et mettre à jour l'affichage
@@ -36,14 +43,11 @@ POPIN.updateAndHide = function(div, object) {
     // (on va chercher la donnée dans la ban mais on ne s'en sert pas).
     Z.get({uri: uriGroup + '/group/' + eltId, callback: function (err, xhr) {
                 if (err) return console.error(err);
-
-                eltTo = Z.qs('#list #' + eltId);
-                eltFrom = Z.qs('#group_name_new');
                 eltTo.dataset.value = eltFrom.value;
-
                 eltTo = Z.qs('#list #' + eltId + ' span');
                 eltTo.textContent = eltFrom.value;
                 }});
+    }
 
     return POPIN.hide(div);
 }

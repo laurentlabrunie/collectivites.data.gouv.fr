@@ -9,7 +9,7 @@ from werkzeug import security
 
 from . import app
 from . import utils
-from . import addr_utils
+from addr_utils import AddrGroup
 
 
 @app.route('/')
@@ -185,29 +185,28 @@ class MakeGroupList:
          (non finalisé pour l'instant) """
 
         for group in self.list_groups:
-            words = addr_utils.split_as_listof_words(group['name'])
-            tos = addr_utils.guess_typeof_street(words)
-            sw = addr_utils.guess_strong_word(words)
-            group['data_to_compare'] = tos + sw
-            sl = addr_utils.guess_stateof_label(group['name'])
-            group['message_alert'] = self.construction_message(sl)
 
-    def construction_message(self, bitstream):
+            addr = AddrGroup(group['name'])
+            group['data_to_compare'] = addr.guess_typeof_street + addr.guess_strong_word
+            group['message_alert'] = self.construction_message(addr)
+
+    def construction_message(self, addr):
 
         """ """
 
         message_alert = ''
+        message_content = [];
 
-        message_content = {
-            addr_utils.LABEL_ONLY_UPPERCASE_ERROR: 'Tous les caractères sont en majuscule',
-            addr_utils.LABEL_BAD_CAPITALIZE_ERROR: 'Des caractères sont mal capitalisés',
-            addr_utils.LABEL_WITH_REPETITION_ERROR: 'Des mots sont en double'
-        }
+        if addr.is_label_only_uppercased:
+            message_content.append('Tous les caractères sont en majuscule')
+        if (addr.is_label_bad_capitalized):
+            message_content.append('Des caractères sont mal capitalisés')
+        if (addr.is_label_with_repetition):
+            message_content.append('Des mots sont en double')
 
-        if bitstream != 0:
+        if len(message_content) != 0:
             message_alert = 'Mauvais libellé :'
-            for key, value in message_content.items():
-                if bitstream & key == key:
+            for value in message_content:
                     message_alert = message_alert + '\n - ' + value
 
         return message_alert
