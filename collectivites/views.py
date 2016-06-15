@@ -195,7 +195,7 @@ class MakeGroupList:
         """ """
 
         message_alert = ''
-        message_content = [];
+        message_content = []
 
         if addr.is_label_only_uppercased:
             message_content.append('Tous les caractères sont en majuscule')
