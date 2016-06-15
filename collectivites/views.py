@@ -160,11 +160,13 @@ def ban_duplication():
 @app.route('/ban/reliability', methods=['POST'])
 def ban_reliability():
     list_content = utils.decode_and_unjson(request.form['list'])
-
+    nb_groups = len(list_content['groups'])
     make_file = MakeGroupList(list_content)
     content_complete = make_file.create_content_complete()
 
-    return render_template('ban/reliability.html', groups=utils.json_and_encode(content_complete))
+    return render_template('ban/reliability.html',
+            groups=utils.json_and_encode(content_complete),
+            nb_groups=nb_groups)
 
 
 class MakeGroupList:
@@ -195,7 +197,7 @@ class MakeGroupList:
         """ """
 
         message_alert = ''
-        message_content = [];
+        message_content = []
 
         if addr.is_label_only_uppercased:
             message_content.append('Tous les caractères sont en majuscule')
@@ -220,11 +222,21 @@ class MakeGroupList:
 
            Et c'est ensuite que l'on fait la comparaison... """
 
+        nb_groups_before = len(self.list_groups)
+
         while len(self.list_groups) != 0:
             parent_id = self.list_groups[0]['id']
             self.content_ordered.append(self.list_groups[0])
             del self.list_groups[0]
             self.compare_one_group_to_others(parent_id)
+
+        nb_groups_after = len(self.content_ordered)
+
+        if nb_groups_before != nb_groups_after:
+            raise ValueError('Fonction "compare_groups" : le nombre de voie est différent avant '
+                                'et après le traitement : Avant <' + str(nb_groups_before) + '> '
+                                'et Après <' + str(nb_groups_after) + '>')
+
 
     def compare_one_group_to_others(self, parent_id):
 

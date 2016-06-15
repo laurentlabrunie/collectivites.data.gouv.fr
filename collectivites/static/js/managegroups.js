@@ -1,3 +1,5 @@
+'use strict';
+
 // Ouverture de la popin en modification
 POPIN.popUpdateForGroups = function(div, object) {
 

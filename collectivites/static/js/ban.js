@@ -96,8 +96,8 @@ BAN.displaySelectorMunicipalityForDuplicate = function (selector1, selector2) {
 /* Récupère la liste totale des voies pour une commune à partir du numéro insee
         et la met en session sous forme JSON */
 
-//var uriGroup = 'http://ban-dev.data.gouv.fr';
-var uriGroup = 'http://localhost:5959';
+var uriGroup = 'http://ban-dev.data.gouv.fr';
+//var uriGroup = 'http://localhost:5959';
 var event = new CustomEvent('endOfLoad');
 var groupsJSONToArray = [];
 var groupsMunicipalityArray = [];
@@ -115,7 +115,7 @@ BAN.listGroupsComplete = function (selector, municipality) {
 
     citycode = citycode || '01001';
 
-    var uriComplete = uriGroup + '/municipality/insee:' + citycode + '/groups?limit=10000';
+    var uriComplete = uriGroup + '/municipality/insee:' + citycode + '/groups?limit=100';
 
     BAN.banGroups(selector, uriComplete);
 }
@@ -159,11 +159,11 @@ var groupIconAfter = '<a href="#" onClick="return POPIN.popUpdateForGroups(\'mod
         + '<a href="#" onClick="return POPIN.popRemoveForGroups(\'rem_groups\', this)">'
         +   '<i class="' + listIcones['remove'] + '" title="Supprimer la voie"></i>'
         + '</a>'
-        + '<a href="#" onClick="BAN.moveIn(this, \'#select\')">'
+        + '<a href="#" onClick="BAN.moveInButton(this, \'#select\')">'
         +   '<i class="' + listIcones['gotoright'] + '" title="Déplacer dans le sas de fiabilisation"></i>'
         + '</a>';
 
-var groupIconBefore = '<a href="#" onClick="BAN.moveIn(this, \'#list\')">'
+var groupIconBefore = '<a href="#" onClick="BAN.moveInButton(this, \'#list\')">'
         +   '<i class="' + listIcones['gotoleft'] + '" title="Déplacer dans la liste des voies"></i>'
         + '</a>';
 
@@ -220,6 +220,8 @@ BAN.displayGroups = function(encodedGroups) {
             var oldParent = evt.from.id;
             var newParent = elt.parentElement.id;
             if (newParent != oldParent) {
+                console.log(elt);
+                BAN.MoveInDragAndDrop(elt, newParent)
                 BAN.iconeManagement(elt, newParent);
                 }
             }
@@ -227,10 +229,56 @@ BAN.displayGroups = function(encodedGroups) {
 }
 
 BAN.moveIn = function(element, idWhere) {
-    var eltToMove = Z.parents('LI', element);
-    BAN.iconeManagement(eltToMove, idWhere)
+    BAN.iconeManagement(element, idWhere)
     var eltWhere = Z.qs(idWhere);
-    eltWhere.appendChild(eltToMove);
+    eltWhere.appendChild(element);
+}
+
+BAN.moveInButton = function(element, idWhere) {
+    var eltToMove = Z.parents('LI', element);
+    var isParent = eltToMove.classList.contains('parent');
+
+    if (isParent) {
+        var childIds = BAN.getChildren(eltToMove)
+        BAN.moveIn(eltToMove, idWhere);
+        BAN.moveChilds(childIds, idWhere);
+    }
+    else {
+        BAN.moveIn(eltToMove, idWhere);
+    }
+
+}
+
+BAN.MoveInDragAndDrop = function(element, idWhere) {
+    var isParent = element.classList.contains('parent');
+
+    if (isParent) {
+        var childIds = BAN.getChildren(element)
+        BAN.moveChilds(childIds, idWhere);
+    }
+}
+
+BAN.getChildren = function(element) {
+    var idParent = element.id;
+    var ulParent = Z.parents('UL', element);
+    var listIdChilds = new Array();
+
+    for (var eltNb = 0; eltNb < ulParent.childNodes.length; eltNb++) {
+        var elt = ulParent.childNodes[eltNb];
+
+        if (elt.dataset.parent_id == idParent) {
+            listIdChilds.push(elt.id);
+        }
+    }
+
+    return listIdChilds;
+}
+
+BAN.moveChilds = function(childIds, idWhere) {
+    for (var idNb = 0; idNb < childIds.length; idNb++) {
+        var eltToMove = Z.qs('#' + childIds[idNb]);
+        BAN.moveIn(eltToMove, idWhere);
+    }
 }
 
 BAN.iconeManagement = function(eltToMove, idWhere) {

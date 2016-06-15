@@ -1,3 +1,5 @@
+'use strict';
+
 var POPIN = {};
 
 POPIN.pop = function (div) {
