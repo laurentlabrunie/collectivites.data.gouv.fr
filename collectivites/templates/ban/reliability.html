@@ -1,26 +1,52 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2 id="pagetitle"></h2>
+<div id="groups" class="container">
+    <div class="headerpage">
+        <h2>Fiabiliser les noms de voies dans la BAN</h2>
+        <h3 id="pagetitle"></h3>
 
-<div id="groups" class="reliability_container">
+        <div class="block__filter">
+            <div class="block__filter-accordion">
+                <a href="#" onClick="reliability.showFilter()">
+                    <i class="glyphicon glyphicon-plus" title="Déplier le filtre">
+                    </i>
+                </a>
+                <a href="#" onClick="reliability.hideFilter()">
+                    <i class="glyphicon glyphicon-minus" title="Replier le filtre">
+                    </i>
+                </a>
+            </div>
+            <div class="block__filter-content">
+                <input type="text" name="words" placeholder="Recherche par mot" />
+                <input type="button" value ="Filtrer" onClick="reliability.activateFilter()" />
+                <input type="button" value ="Tout afficher" onClick="reliability.deactivateFilter()" />
+            </div>
+        </div>
+    </div>
+
+
+<div class="grid">
+
     <div class="block__list">
         <div class="block__list-title" >
-            <h4>Voies de la commune et alertes ({{nb_groups}})</h4>
+            <h4>Voies de la commune et alertes (<span id="nbfiltre"></span>/{{nb_groups}})</h4>
         </div>
         <ul class="block__list-content" id="list">
         </ul>
     </div>
     <div class="block__list">
         <div class="block__list-title">
-            <h4>Sas de fiabilisation <span class="glyphicon glyphicon-info-sign"
-                    title="Pour une même voie, rajouter les doublons identifiés et sélectionner le bon libellé ou celui qui correspond à la bonne voie et renseigner le libellé correctement"</h4>
+            <h4>Sas de fiabilisation <i class="glyphicon glyphicon-info-sign"
+                    title="Pour une même voie, rajouter les doublons identifiés et sélectionner le bon libellé ou celui qui correspond à la bonne voie et renseigner le libellé correctement">
+
+                </i>
+            </h4>
         </div>
         <ul class="block__list-content" id="select">
         </ul>
-        <div class="block_end">
-            <input type="text" placeholder="nom de la voie" />
-            <input type="button" value="OK"/>
+        <div class="block__end">
+            <input type="button" disabled="disabled" value="Valider les doublons"/>
         </div>
     </div>
 </div>
@@ -30,6 +56,7 @@
 
 <script>
     BAN.displayGroups("{{ groups }}");
+    reliability.pageInit();
 
 </script>
 {% endblock content %}

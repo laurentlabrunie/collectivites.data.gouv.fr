@@ -85,6 +85,14 @@ var Z = {
         options = options || {};
         options.verb = 'GET';
         Z.xhr(options);
+    },
+
+    hide: function(element) {
+        Z.qs(element).style.display="none";
+    },
+
+    show: function(element) {
+        Z.qs(element).style.display="inline-block";
     }
 
 };
@@ -202,6 +210,7 @@ Z.progress.prototype.clear = function () {
     this.el.removeAttribute('value');  // Switch to undeterminate state.
 }
 
+
 /* Redéfinition de customEvent dans le cas de navigateurs qui ne le gèrent pas (ie) */
 
 (function () {
@@ -216,3 +225,5 @@ Z.progress.prototype.clear = function () {
 
   window.CustomEvent = CustomEvent;
 })();
+
+

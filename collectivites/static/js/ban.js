@@ -153,17 +153,20 @@ var listIcones = {
     'close': 'glyphicon glyphicon-remove'
 }
 
-var groupIconAfter = '<a href="#" onClick="return POPIN.popUpdateForGroups(\'mod_groups\', this)">'
+var groupIconAfter = '<a href="#" onClick="return POPIN.popUpdateForGroups(\'upd_groups\', this)">'
         +   '<i class="' + listIcones['edit'] + '" title="Modifier le libellé de la voie"></i>'
         + '</a>'
         + '<a href="#" onClick="return POPIN.popRemoveForGroups(\'rem_groups\', this)">'
         +   '<i class="' + listIcones['remove'] + '" title="Supprimer la voie"></i>'
         + '</a>'
-        + '<a href="#" onClick="BAN.moveInButton(this, \'#select\')">'
+        + '<a href="#" onClick="reliability.moveInButton(this, \'#select\')">'
         +   '<i class="' + listIcones['gotoright'] + '" title="Déplacer dans le sas de fiabilisation"></i>'
         + '</a>';
-
-var groupIconBefore = '<a href="#" onClick="BAN.moveInButton(this, \'#list\')">'
+var groupRadio = '<INPUT type="radio" name="groupselect" onclick="reliability.displayUpdate(this)">'
+        + '<a href="#" class="updatebtn" onClick="return POPIN.popUpdateForGroups(\'upd_groups\', this)">'
+        +   '<i class="' + listIcones['edit'] + '" title="Modifier le libellé de la voie"></i>'
+        + '</a>';
+var groupIconBefore = '<a href="#" onClick="reliability.moveInButton(this, \'#list\')">'
         +   '<i class="' + listIcones['gotoleft'] + '" title="Déplacer dans la liste des voies"></i>'
         + '</a>';
 
@@ -173,7 +176,7 @@ var groupListWithoutUlTmpl = '{{#each groups}}<li class="draggable {{class_child
         + '<div class="groupname">{{# if class_children}}<i class="' + listIcones['children'] + '"></i>{{/if}}'
         + '{{# if class_parent}}<i class="' + listIcones['parent'] + '"></i>{{/if}}'
         + '{{# if message_alert}}<i class="' + listIcones['warning'] + '" '
-        + 'title="{{message_alert}}"></i>{{/if}} <span>{{name}}</span></div>'
+        + 'title="{{message_alert}}"></i>{{/if}}<span>{{name}}</span></div>'
         + '<div class="groupiconafter">' + groupIconAfter + '</div></li>{{/each}}';
 
 BAN.displayGroups = function(encodedGroups) {
@@ -183,118 +186,9 @@ BAN.displayGroups = function(encodedGroups) {
     var citycode = JSON.parse(JSONgroups).citycode;
     var groups = JSON.parse(JSONgroups).groups;
 
-    Z.qs("#pagetitle").innerHTML = 'Fiabiliser les noms de voies dans la BAN pour la commune de ' + municipality
-            + ' (' + citycode + ')';
-
-    var list = document.getElementById('list');
-    var listSort = Sortable.create(list, {
-        group: {
-            name: 'groups',
-            pull: true,
-            put: true
-            },
-        draggable: '.draggable',
-        sort: false,
-        onAdd: function(evt) {
-            var elt = evt.item;
-            var oldParent = evt.from.id;
-            var newParent = elt.parentElement.id;
-            if (newParent != oldParent) {
-                BAN.iconeManagement(elt, newParent);
-                }
-            }
-        });
+    Z.qs("#pagetitle").innerHTML = 'Commune de ' + municipality + ' (' + citycode + ')';
 
     list.innerHTML = Handlebars.compile(groupListWithoutUlTmpl)({ groups: groups });
 
-    var select = document.getElementById('select');
-    var selectSort = Sortable.create(select, {
-        group: {
-            name: 'groups',
-            pull: true,
-            put: true
-            },
-        sort: false,
-        onAdd: function(evt) {
-            var elt = evt.item;
-            var oldParent = evt.from.id;
-            var newParent = elt.parentElement.id;
-            if (newParent != oldParent) {
-                console.log(elt);
-                BAN.MoveInDragAndDrop(elt, newParent)
-                BAN.iconeManagement(elt, newParent);
-                }
-            }
-        });
 }
 
-BAN.moveIn = function(element, idWhere) {
-    BAN.iconeManagement(element, idWhere)
-    var eltWhere = Z.qs(idWhere);
-    eltWhere.appendChild(element);
-}
-
-BAN.moveInButton = function(element, idWhere) {
-    var eltToMove = Z.parents('LI', element);
-    var isParent = eltToMove.classList.contains('parent');
-
-    if (isParent) {
-        var childIds = BAN.getChildren(eltToMove)
-        BAN.moveIn(eltToMove, idWhere);
-        BAN.moveChilds(childIds, idWhere);
-    }
-    else {
-        BAN.moveIn(eltToMove, idWhere);
-    }
-
-}
-
-BAN.MoveInDragAndDrop = function(element, idWhere) {
-    var isParent = element.classList.contains('parent');
-
-    if (isParent) {
-        var childIds = BAN.getChildren(element)
-        BAN.moveChilds(childIds, idWhere);
-    }
-}
-
-BAN.getChildren = function(element) {
-    var idParent = element.id;
-    var ulParent = Z.parents('UL', element);
-    var listIdChilds = new Array();
-
-    for (var eltNb = 0; eltNb < ulParent.childNodes.length; eltNb++) {
-        var elt = ulParent.childNodes[eltNb];
-
-        if (elt.dataset.parent_id == idParent) {
-            listIdChilds.push(elt.id);
-        }
-    }
-
-    return listIdChilds;
-}
-
-BAN.moveChilds = function(childIds, idWhere) {
-    for (var idNb = 0; idNb < childIds.length; idNb++) {
-        var eltToMove = Z.qs('#' + childIds[idNb]);
-        BAN.moveIn(eltToMove, idWhere);
-    }
-}
-
-BAN.iconeManagement = function(eltToMove, idWhere) {
-    idWhere = idWhere.replace ('#','');
-    switch(idWhere) {
-        case 'select':
-            eltToMove.classList.remove("children");
-            eltToMove.classList.remove("parent");
-            eltToMove.childNodes[0].innerHTML = groupIconBefore + eltToMove.childNodes[0].innerHTML
-                    .replace('<i class="' + listIcones['parent'] + '"></i>', '')
-                    .replace('<i class="' + listIcones['children'] + '"></i>', '');
-            eltToMove.childNodes[1].innerHTML = '';
-            break;
-        case 'list':
-            eltToMove.childNodes[0].removeChild(eltToMove.childNodes[0].firstChild);
-            eltToMove.childNodes[1].innerHTML = groupIconAfter;
-            break;
-    }
-}

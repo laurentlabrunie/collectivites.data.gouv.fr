@@ -1,4 +1,53 @@
-.reliability_container {
+
+.container #groups {
+    display:flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+#groups input[type='button'] {
+    display: inline-block;
+    margin:10px;
+    border-radius:10px 10px;
+    width: 100px;
+    height: 30px;
+    background: #A2BBD6;
+    background-image:radial-gradient(#D19EA2, white, #A2BBD6);
+    text-align: center;
+}
+
+.headerpage h2,
+.headerpage h3 {
+    text-align: center;
+}
+
+.block__filter {
+    border-radius:10px 10px;
+    margin: auto;
+    margin-top: 10px;
+    margin-bottom : 10px;
+    width: 95%;
+}
+
+.block__filter-accordion {
+    border-radius:10px 10px 0px 0px;
+    height: 20px;
+    background-image:radial-gradient(#D19EA2, white, #A2BBD6);
+}
+
+.block__filter-content {
+    width: 100%;
+    border-radius:0px 0px 10px 10px;
+    height: 100px;
+    background-image:radial-gradient(#D19EA2, white, #A2BBD6);
+}
+
+.block__filter-content input[name="words"] {
+    width: 200px;
+    height: 30px;
+}
+
+.grid {
     display:flex;
     width: 100%;
 }
@@ -7,7 +56,7 @@
     border-radius:10px 10px;
     width: 45%;
     margin: auto;
-    height: 600px
+    height: 500px;
 }
 
 .block__list-title h4{
@@ -33,13 +82,15 @@
 }
 
 .block__list-content li:hover{
-    cursor: pointer;
-    cursor: -Moz-Grab;
+    /* cursor: -Moz-Grab; */
 }
 
 .block__list-content li:active{
-    cursor: pointer;
-    cursor: -Moz-Grabbing;
+    /* cursor: -Moz-Grabbing; */
+}
+
+.block__list-content input[type="radio"]{
+    margin:5px;
 }
 
 .block__list-content .groupname {
@@ -73,6 +124,10 @@
     cursor: help;
 }
 
+.groupname .glyphicon {
+    margin-right: 5px;
+}
+
 .block__list-content .children{
     margin-left: 20px;
 }
@@ -85,26 +140,21 @@
     height:90%;
 }
 
-.block_end {
+.block__end {
     height:10%;
     text-align: center;
 }
 
-.block_end input[type="text"] {
-    border-radius:10px 10px;
-    width:95%;
-    margin: auto;
-    display: inline-block;
-    text-align: left;
-    background: #A2BBD6;
-    background-image:linear-gradient(165deg, #A2BBD6, white, #D19EA2);
+#groups .block__end input[type="button"] {
+    width: 200px;
+    text-align: center;
+
 }
 
-.block_end input[type="button"] {
-    display: inline-block;
-    border-radius:10px 10px;
-    width:50%;
-    background: #A2BBD6;
-    background-image:radial-gradient(#D19EA2, white, #A2BBD6);
+.block__end input[type="button"]:disabled{
+    color: grey;
 }
 
+#select .updatebtn {
+    display: none;
+}

@@ -3,11 +3,11 @@
 var POPIN = {};
 
 POPIN.pop = function (div) {
-    document.getElementById(div).style.display='block';
+    Z.show('#' + div);
     return false;
 }
 
 POPIN.hide = function (div) {
-    document.getElementById(div).style.display='none';
+    Z.hide('#' + div);
     return false;
 }
