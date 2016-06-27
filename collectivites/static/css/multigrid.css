@@ -1,0 +1,147 @@
+
+.multigrid {
+    display:flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.multigrid input[type='button'] {
+    display: inline-block;
+    margin:10px;
+    border-radius:10px 10px;
+    width: 100px;
+    height: 30px;
+    background: #A2BBD6;
+    background-image:radial-gradient(#D19EA2, white, #A2BBD6);
+    text-align: center;
+}
+
+.multigrid [type="button"]:disabled{
+    color: grey;
+}
+
+.multigrid .block__search {
+    border-radius:10px 10px;
+    margin: auto;
+    margin-top: 10px;
+    margin-bottom : 10px;
+    width: 95%;
+}
+
+.multigrid .block__search-accordion {
+    border-radius:10px 10px 0px 0px;
+    height: 20px;
+    background-image:radial-gradient(#D19EA2, white, #A2BBD6);
+}
+
+.multigrid .block__search-content {
+    width: 100%;
+    border-radius:0px 0px 10px 10px;
+    height: 100px;
+    background-image:radial-gradient(#D19EA2, white, #A2BBD6);
+}
+
+.multigrid .block__search-content input[name="words"] {
+    width: 200px;
+    height: 30px;
+}
+
+.multigrid .grid_content {
+    display:flex;
+    width: 100%;
+}
+
+.multigrid .block__list{
+    border-radius:10px 10px;
+    width: 45%;
+    margin: auto;
+    height: 500px;
+}
+
+.multigrid .block__list-title h4{
+    text-align: center;
+    border-radius:10px 10px;
+    line-height:50px;
+    background: #D19EA2;
+    background-image:radial-gradient(#D19EA2, white, #A2BBD6);
+}
+
+.multigrid .block__list-content {
+    line-height:40px;
+    overflow: auto;
+}
+
+.multigrid .block__list-content li{
+    display:flex;
+    background: #A2BBD6;
+    background-image:linear-gradient(15deg, #A2BBD6, white, #D19EA2);
+    border-radius:10px 10px 10px 10px;
+    padding: 0px 5px;
+    margin: 5px;
+}
+
+.multigrid .block__list-content input[type="radio"]{
+    margin:5px;
+}
+
+.multigrid .block__list-content .groupname {
+    width:75%;
+}
+
+.multigrid .block__list-content .groupiconafter {
+    width:25%;
+}
+
+.multigrid .block__list-content .groupiconafter .glyphicon,
+.multigrid .block__list-content .groupname .glyphicon-hand-left {
+    border-width: 1px;
+    padding: 5px;
+    border-style: outset;
+    border-radius:5px 5px;
+}
+
+.multigrid .groupiconafter .glyphicon,
+.multigrid .glyphicon-hand-left {
+    cursor: pointer;
+}
+
+.multigrid .block__list-content .groupiconafter .glyphicon:active,
+.multigrid .block__list-content .groupname .glyphicon-hand-left:active {
+    border-style: inset;
+}
+
+.multigrid .glyphicon-warning-sign,
+.multigrid .glyphicon-info-sign {
+    cursor: help;
+}
+
+.multigrid .groupname .glyphicon {
+    margin-right: 5px;
+}
+
+.multigrid .block__list-content .children{
+    margin-left: 20px;
+}
+
+
+.multigrid .block__end {
+    height:10%;
+    text-align: center;
+}
+
+.multigrid .block__end input[type="button"] {
+    width: 200px;
+    text-align: center;
+}
+
+.multigrid #listUpdate {
+    height:100%;
+}
+
+.multigrid #listSelect {
+    height:90%;
+}
+
+.multigrid #listSelect .updatebtn {
+    display: none;
+}

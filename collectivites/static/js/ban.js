@@ -140,7 +140,7 @@ BAN.banGroups = function (selector, url) {
             }});
     }
 
-/* Affiche la liste des voies d'une commune et gère le fonctionnement du drag and drop */
+/* Affiche la liste des voies d'une commune */
 
 var listIcones = {
     'edit': 'glyphicon glyphicon-pencil',
@@ -159,14 +159,14 @@ var groupIconAfter = '<a href="#" onClick="return POPIN.popUpdateForGroups(\'upd
         + '<a href="#" onClick="return POPIN.popRemoveForGroups(\'rem_groups\', this)">'
         +   '<i class="' + listIcones['remove'] + '" title="Supprimer la voie"></i>'
         + '</a>'
-        + '<a href="#" onClick="reliability.moveInButton(this, \'#select\')">'
+        + '<a href="#" onClick="R.moveInButton(this, \'#listSelect\')">'
         +   '<i class="' + listIcones['gotoright'] + '" title="Déplacer dans le sas de fiabilisation"></i>'
         + '</a>';
-var groupRadio = '<INPUT type="radio" name="groupselect" onclick="reliability.displayUpdate(this)">'
+var groupRadio = '<INPUT type="radio" name="groupselect" onclick="R.displayUpdate(this)">'
         + '<a href="#" class="updatebtn" onClick="return POPIN.popUpdateForGroups(\'upd_groups\', this)">'
         +   '<i class="' + listIcones['edit'] + '" title="Modifier le libellé de la voie"></i>'
         + '</a>';
-var groupIconBefore = '<a href="#" onClick="reliability.moveInButton(this, \'#list\')">'
+var groupIconBefore = '<a href="#" onClick="R.moveInButton(this, \'#listUpdate\')">'
         +   '<i class="' + listIcones['gotoleft'] + '" title="Déplacer dans la liste des voies"></i>'
         + '</a>';
 
@@ -179,7 +179,7 @@ var groupListWithoutUlTmpl = '{{#each groups}}<li class="draggable {{class_child
         + 'title="{{message_alert}}"></i>{{/if}}<span>{{name}}</span></div>'
         + '<div class="groupiconafter">' + groupIconAfter + '</div></li>{{/each}}';
 
-BAN.displayGroups = function(encodedGroups) {
+BAN.displayGroups = function(encodedGroups, nbGroups) {
     var JSONgroups = decodeURIComponent(encodedGroups);
 
     var municipality = JSON.parse(JSONgroups).name;
@@ -188,7 +188,8 @@ BAN.displayGroups = function(encodedGroups) {
 
     Z.qs("#pagetitle").innerHTML = 'Commune de ' + municipality + ' (' + citycode + ')';
 
-    list.innerHTML = Handlebars.compile(groupListWithoutUlTmpl)({ groups: groups });
+    listUpdate.innerHTML = Handlebars.compile(groupListWithoutUlTmpl)({ groups: groups });
 
+    R.pageInit(groups, nbGroups);
 }
 

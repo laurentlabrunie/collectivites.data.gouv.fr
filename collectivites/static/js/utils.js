@@ -202,14 +202,29 @@ Z.progress = function (options) {
 };
 Z.progress.prototype.update = function (value) {
     this.el.value = value || (this.el.value + 1) || 0;
-}
+};
 Z.progress.prototype.remove = function () {
     this.el.parentNode.removeChild(this.el);
-}
+};
 Z.progress.prototype.clear = function () {
     this.el.removeAttribute('value');  // Switch to undeterminate state.
-}
+};
 
+// Suppression d'un élément dans un tableau
+// et réinitialisation des clés à partir de 0
+
+Z.reorgArray = function(arrayToUpdate) {
+    var arrayUpdated = [];
+    var keyUpdated = 0;
+
+    for (var key = 0; key <= arrayToUpdate.length; key++) {
+        if(arrayToUpdate[key]) {
+            arrayUpdated[keyUpdated] = arrayToUpdate[key];
+            keyUpdated++;
+        }
+    }
+    return arrayUpdated;
+};
 
 /* Redéfinition de customEvent dans le cas de navigateurs qui ne le gèrent pas (ie) */
 
@@ -225,5 +240,6 @@ Z.progress.prototype.clear = function () {
 
   window.CustomEvent = CustomEvent;
 })();
+
 
 

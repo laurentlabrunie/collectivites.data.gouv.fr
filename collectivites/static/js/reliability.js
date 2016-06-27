@@ -1,53 +1,96 @@
 'use strict';
-var reliability = {
-    listToShow: [],
+var R = {
+    listComplete: [],
+    firstListName: 'listUpdate',
+    secondListName: 'listSelect',
+    displayNo : 'none',
+    displayYes : 'flex',
 
-    pageInit: function() {
-        reliability.hideFilter();
-        reliability.afterChange();
+    pageInit: function(groupList, nbGroups) {
+        R.hideSearch();
+        R.listComplete = R.initList(groupList);
+        R.nbDisplayedInFirstList = R.listComplete.length;
+        R.verifyNbGroups(nbGroups);
+        R.displayNbListComplete(nbGroups);
+        R.displayNbFirstList();
     },
 
-    initList: function(ulElt) {
-        var list = [];
-        var elts = ulElt.children;
+    initList: function(groupList) {
 
-        for (var nbLiElt = 0; nbLiElt < elts.length; nbLiElt++) {
-            var elt = elts[nbLiElt];
-            list[elt.id] = [elt.textContent];
+        for (var key = 0; key < groupList.length; key++) {
+            groupList[key].listName = R.firstListName;
+            groupList[key].displayInFirstList = R.displayYes;
         }
-        list.length = nbLiElt;
+        return groupList;
+    },
+
+    getContentListByListName: function(listName) {
+        var list = [];
+
+        for (var key = 0; key < R.listComplete.length; key++) {
+            if (R.listComplete[key].listName == listName) {
+                list[key] = R.listComplete[key];
+            }
+        }
         return list;
     },
 
-    afterChange: function() {
-        reliability.listToShow = reliability.initList(Z.qs('#list'));
-        reliability.activateFilter();
+    getContentFirstList: function() {
+        var list = R.getContentListByListName(R.firstListName);
+        return list;
+    },
+
+    getContentSecondList: function() {
+        var list = R.getContentListByListName(R.secondListName);
+        return list;
+    },
+
+    getIdByBanId: function(banId) {
+        for (var key = 0; key < R.listComplete.length; key++) {
+            if (R.listComplete[key].id == banId) {
+                return key;
+            }
+        }
+        throw 'Erreur : L\'Id Ban (' + banId + ') n\'a pas été trouvé.'
     }
+
 };
 
-reliability.moveIn = function(element, idWhere) {
-    reliability.iconeManagement(element, idWhere);
+R.verifyNbGroups = function(nbGroups) {
+    if (nbGroups != R.listComplete.length) {
+        var error_message = 'Erreur : Le nombre de voies fourni à l\'IHM (' + nbGroups + ') et calculé lors de l\'affichage (' + R.listComplete.length + ') ne correspondent pas !!!';
+        throw error_message;
+    }
+}
+ // ----------------------------------Gestion des mouvements d'une liste à l'autre ------------------------------------
+
+R.moveIn = function(element, idWhere) {
+
+    R.iconeManagement(element, idWhere);
     var eltWhere = Z.qs(idWhere);
     eltWhere.appendChild(element);
+    R.changeList(idWhere, element.id);
 }
 
-reliability.moveInButton = function(element, idWhere) {
+R.moveInButton = function(element, idWhere) {
     var eltToMove = Z.parents('LI', element);
     var isParent = eltToMove.classList.contains('parent');
 
     if (isParent) {
-        var childIds = reliability.getChildren(eltToMove);
-        reliability.moveIn(eltToMove, idWhere);
-        reliability.moveChilds(childIds, idWhere);
+        var childIds = R.getChildren(eltToMove);
+        R.moveIn(eltToMove, idWhere);
+        R.moveChilds(childIds, idWhere);
     }
     else {
-        reliability.moveIn(eltToMove, idWhere);
+        R.moveIn(eltToMove, idWhere);
     }
-    reliability.activateButton();
-    reliability.afterChange();
+
+    R.activateButton();
+    R.displayNbFirstList();
+
 }
 
-reliability.getChildren = function(element) {
+R.getChildren = function(element) {
     var idParent = element.id;
     var ulParent = Z.parents('UL', element);
     var listIdChilds = new Array();
@@ -62,17 +105,18 @@ reliability.getChildren = function(element) {
     return listIdChilds;
 }
 
-reliability.moveChilds = function(childIds, idWhere) {
+R.moveChilds = function(childIds, idWhere) {
     for (var idNb = 0; idNb < childIds.length; idNb++) {
         var eltToMove = Z.qs('#' + childIds[idNb]);
-        reliability.moveIn(eltToMove, idWhere);
+        eltToMove.style.display = R.displayYes;
+        R.moveIn(eltToMove, idWhere);
     }
 }
 
-reliability.iconeManagement = function(eltToMove, idWhere) {
+R.iconeManagement = function(eltToMove, idWhere) {
     idWhere = idWhere.replace ('#','');
     switch(idWhere) {
-        case 'select':
+        case R.secondListName:
             eltToMove.classList.remove("children");
             eltToMove.classList.remove("parent");
             eltToMove.children[0].innerHTML = groupIconBefore + eltToMove.children[0].innerHTML
@@ -80,26 +124,50 @@ reliability.iconeManagement = function(eltToMove, idWhere) {
                     .replace('<i class="' + listIcones['children'] + '"></i>', '');
             eltToMove.children[1].innerHTML = groupRadio;
             break;
-        case 'list':
+        case R.firstListName:
             eltToMove.children[0].removeChild(eltToMove.children[0].firstChild);
             eltToMove.children[1].innerHTML = groupIconAfter;
             break;
     }
 }
 
-reliability.displayUpdate = function(radioClicked) {
+R.changeList = function(idWhere, banId) {
+    var id = R.getIdByBanId(banId);
+    var group = R.listComplete[id];
+    var elt =  Z.qs(idWhere + ' #' + banId);
+
+    if (idWhere == '#' + R.secondListName) {
+        if( group.displayInFirstList == R.displayYes ) {
+            R.decreaseNbFirstList();
+        }
+        elt.style.display = R.displayYes;
+    }
+    else {
+        if( group.displayInFirstList == R.displayYes ) {
+            R.increaseNbFirstList();
+        }
+        elt.style.display = group.displayInFirstList;
+    }
+
+    R.listComplete[id].listName = idWhere.replace('#','');
+}
+
+
+// ------------------ Gestion du bouton de modif côté SAS -----------------------
+
+R.displayUpdate = function(radioClicked) {
     var eltParent = Z.parents('LI', radioClicked);
-    var elts = Z.qsa('#select .updatebtn');
+    var elts = Z.qsa('#' + R.secondListName + ' .updatebtn');
 
     for (var eltNb = 0; eltNb < elts.length; eltNb++) {
-        elts[eltNb].style.display="none";
+        elts[eltNb].style.display = R.displayNo;
     }
 
     Z.qs('#' + eltParent.id + ' .updatebtn').style.display="inline-block";
-    reliability.activateButton();
+    R.activateButton();
 }
 
-reliability.moreThan = function(container, limitNumber) {
+R.moreThan = function(container, limitNumber) {
     if (container.children.length >= limitNumber) {
         return true;
     } else {
@@ -107,8 +175,8 @@ reliability.moreThan = function(container, limitNumber) {
     }
 }
 
-reliability.radioActivatedOnce = function() {
-    var elts = Z.qsa('#select input[type="radio"]');
+R.radioActivatedOnce = function() {
+    var elts = Z.qsa('#' + R.secondListName + ' input[type="radio"]');
 
     for (var nb = 0; nb < elts.length; nb++) {
         if (elts[nb].checked) {return true;}
@@ -116,21 +184,22 @@ reliability.radioActivatedOnce = function() {
     return false;
 }
 
-reliability.activateButton = function() {
+// ---------------------------Gestion du bouton de validation du SAS ------------------
+R.activateButton = function() {
     var button = Z.qs('.block__end input[type="button"]');
-    var container = Z.qs('#select');
+    var container = Z.qs('#' + R.secondListName);
     var state = true;
 
-    var moreThanTwoInSas = reliability.moreThan(container, 2);
-    var radioActivated = reliability.radioActivatedOnce();
+    var moreThanTwoInSas = R.moreThan(container, 2);
+    var radioActivated = R.radioActivatedOnce();
 
     if (moreThanTwoInSas && radioActivated) {
         state = false;
     }
-    reliability.changeElementState(button, state);
+    R.changeElementState(button, state);
 }
 
-reliability.changeElementState = function(element, state = null) {
+R.changeElementState = function(element, state = null) {
     if (state == true || state == false) {
         if (element.disabled != state) {
             element.disabled = state;
@@ -141,70 +210,107 @@ reliability.changeElementState = function(element, state = null) {
     }
 }
 
-reliability.showFilter = function() {
-    Z.hide('.block__filter-accordion .glyphicon-plus');
-    Z.show('.block__filter-accordion .glyphicon-minus');
-    Z.show('.block__filter .block__filter-content');
+// -----------------------------Gestion de l'accordéon de la zone de recherche
+R.showSearch = function() {
+    Z.hide('.block__search-accordion .glyphicon-plus');
+    Z.show('.block__search-accordion .glyphicon-minus');
+    Z.show('.block__search .block__search-content');
 }
 
-reliability.hideFilter = function() {
-    Z.show('.block__filter-accordion .glyphicon-plus');
-    Z.hide('.block__filter-accordion .glyphicon-minus');
-    Z.hide('.block__filter .block__filter-content');
+R.hideSearch = function() {
+    Z.show('.block__search-accordion .glyphicon-plus');
+    Z.hide('.block__search-accordion .glyphicon-minus');
+    Z.hide('.block__search .block__search-content');
 }
 
-reliability.activateFilter = function() {
+// ------------------------- Recherche ----------------------------------------
+R.activateSearch = function() {
 
-    var listToShow = reliability.wordFilter(reliability.listToShow);
-    reliability.filter(Z.qs('#list'), listToShow);
+    var listToShow = R.wordSearch();
+    R.search(listToShow);
 }
 
-reliability.wordFilter = function(list) {
+R.wordSearch = function() {
     var stringComplete = Z.qs('input[name="words"]').value;
     var words = stringComplete.split(";");
-    list = reliability.searchWordsInList(list, words);
+    var list = R.searchWordsInListUpdate(words);
     return list;
 }
 
-reliability.searchWordsInList= function(list, wordsList) {
+R.searchWordsInListUpdate= function(wordsList) {
     var listLiOK = [];
 
-    for (var banId in list) {
-        var str = list[banId];
-        str = str.toString().toUpperCase();
+    var list = R.listComplete;
+
+    for (var key = 0; key < list.length; key++) {
+        var str = list[key].name;
+        str = str.toUpperCase();
         for (var nbwords = 0; nbwords < wordsList.length; nbwords++) {
             var word = wordsList[nbwords];
             word = word.toUpperCase();
             if (str.indexOf(word) != -1) {
-                listLiOK[banId]=list[banId];
-                listLiOK.length++;
+                listLiOK.push(list[key]);
             }
         }
     }
     return listLiOK;
 }
 
-reliability.filter = function(ulElt, list) {
-    var elts = ulElt.children;
+R.search = function(listDisplayed) {
+    var list = R.listComplete;
     var display;
-    for (var nbLiElt = 0; nbLiElt < elts.length; nbLiElt++) {
-        display = false;
-        var elt = elts[nbLiElt];
-        for (var banId in list) {
-            if (banId == elt.id) {
-                display = true;
+
+    R.nbDisplayedInFirstList = 0;
+
+    for (var key = 0; key < list.length; key++) {
+        display = R.displayNo;
+
+        for (var key2 = 0; key2 < listDisplayed.length; key2++) {
+            if (list[key]['id'] == listDisplayed[key2]['id']) {
+                display = R.displayYes;
             }
         }
-        if (display == false) {
-            elt.style.display = 'none';
-        } else {
-            elt.style.display = 'flex';
+
+        R.listComplete[key].displayInFirstList = display;
+
+        var elt = Z.qs('#' + list[key]['id']);
+        var parent = elt.parentElement.id;
+
+        if (parent == R.firstListName ) {
+            elt.style.display = display;
+            if (display ==  R.displayYes) R.nbDisplayedInFirstList++;
         }
     }
-    Z.qs('#nbfiltre').textContent = list.length;
+console.log(R.nbDisplayedInFirstList);
+    R.displayNbFirstList();
 }
 
-reliability.deactivateFilter = function() {
+ // --------------------------------------------------
+R.deactivateSearch = function() {
     Z.qs('input[name="words"]').value = "";
-    reliability.activateFilter();
+    R.activateSearch();
+}
+
+R.increaseNbFirstList = function() {
+    R.nbDisplayedInFirstList++;
+}
+
+R.decreaseNbFirstList = function() {
+    R.nbDisplayedInFirstList--;
+}
+
+R.displayNbFirstList = function() {
+    Z.qs('#nblistUpdate').textContent = R.nbDisplayedInFirstList;
+}
+
+R.increaseNbListComplete = function() {
+    R.listComplete.length++;
+}
+
+R.decreaseNbListComplete = function() {
+    R.listComplete.length--;
+}
+
+R.displayNbListComplete = function(nb) {
+    Z.qs('#nbtotal').textContent = nb;
 }

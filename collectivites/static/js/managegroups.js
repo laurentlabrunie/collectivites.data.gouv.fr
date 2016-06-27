@@ -31,8 +31,9 @@ POPIN.updateAndHide = function(div, object) {
 
     var eltId = Z.qs('.popin_update_groups .block_info').id;
     var eltTo = Z.qs('#' + eltId);
-    console.log(eltTo);
+    var id = R.getIdByBanId(eltId);
     var eltFrom = Z.qs('#group_name_new');
+
     if (eltFrom.value == "") {
         alert('Le libellé ne doit pas être vide. Veuillez renseigner le bon libellé.');
         return;
@@ -46,13 +47,12 @@ POPIN.updateAndHide = function(div, object) {
         // (on va chercher la donnée dans la ban mais on ne s'en sert pas).
         Z.get({uri: uriGroup + '/group/' + eltId, callback: function (err, xhr) {
             if (err) return console.error(err);
-            eltTo.dataset.value = eltFrom.value;
+            R.listComplete[id].name = eltFrom.value;
+            eltTo.dataset.value = R.listComplete[id].name;
             eltTo = Z.qs('#' + eltId + ' span');
-            eltTo.textContent = eltFrom.value;
+            eltTo.textContent = R.listComplete[id].name;
 
-            reliability.afterChange();
         }});
-
     }
 
     return POPIN.hide(div);
@@ -62,13 +62,20 @@ POPIN.updateAndHide = function(div, object) {
 POPIN.removeAndHide = function(div, object) {
 
     var eltId = Z.qs('.popin_remove_groups .block_info').id;
-    var eltTo = Z.qs('#list #' + eltId);
+    var eltTo = Z.qs('#' + R.firstListName + ' #' + eltId);
+    var id = R.getIdByBanId(eltId);
 
     // TODO: suppression en base
     // Supprime de l'affichage
     eltTo.remove();
 
-    reliability.afterChange();
+    delete R.listComplete[id];
+    R.listComplete = Z.reorgArray(R.listComplete);
+
+    R.decreaseNbFirstList();
+
+    R.displayNbListComplete(R.listComplete.length);
+    R.displayNbFirstList();
 
     return POPIN.hide(div);
 }
