@@ -170,14 +170,30 @@ var groupIconBefore = '<a href="#" onClick="R.moveInButton(this, \'#listUpdate\'
         +   '<i class="' + listIcones['gotoleft'] + '" title="Déplacer dans la liste des voies"></i>'
         + '</a>';
 
-var groupListWithoutUlTmpl = '{{#each groups}}<li class="draggable {{class_children}} {{class_parent}}" '
+/*var groupListWithoutUlTmpl = '{{#each groups}}<li class="{{class_children}} {{class_parent}}" '
         + 'data-compare="{{data_to_compare}}" id="{{id}}" '
         + 'data-parent_id="{{parent_id}}" data-value="{{name}}" >'
         + '<div class="groupname">{{# if class_children}}<i class="' + listIcones['children'] + '"></i>{{/if}}'
         + '{{# if class_parent}}<i class="' + listIcones['parent'] + '"></i>{{/if}}'
         + '{{# if message_alert}}<i class="' + listIcones['warning'] + '" '
         + 'title="{{message_alert}}"></i>{{/if}}<span>{{name}}</span></div>'
-        + '<div class="groupiconafter">' + groupIconAfter + '</div></li>{{/each}}';
+        + '<div class="groupiconafter">' + groupIconAfter + '</div></li>{{/each}}';*/
+
+var groupListWithoutUlTmpl = '{{#each set_of_groups as |groups_in_set num_set|}}'
+        +'<li class="block__set_of_groups block__set_of_groups_with_groups">'
+        +   '<ul id="{{@num_set}}">'
+        +   '{{#each groups_in_set as |group num_group_in_set|}}'
+        +       '<li class="block__group" id={{id}} data-set_id="{{@num_set}}" data-group_id="{{@num_group_in_set}}">'
+        +           '<div class="groupname" >'
+        +               '{{# if message_alert}}<i class="' + listIcones['warning'] + '" '
+        +                   'title="{{message_alert}}">'
+        +               '</i>{{/if}}<span>{{name}}</span>'
+        +           '</div>'
+        +           '<div class="groupiconafter">' + groupIconAfter + '</div>'
+        +       '</li>'
+        +   '{{/each}}'
+        +   '</ul>'
+        +'</li>{{/each}}';
 
 BAN.displayGroups = function(encodedGroups, nbGroups) {
     var JSONgroups = decodeURIComponent(encodedGroups);
@@ -188,7 +204,7 @@ BAN.displayGroups = function(encodedGroups, nbGroups) {
 
     Z.qs("#pagetitle").innerHTML = 'Commune de ' + municipality + ' (' + citycode + ')';
 
-    listUpdate.innerHTML = Handlebars.compile(groupListWithoutUlTmpl)({ groups: groups });
+    listUpdate.innerHTML = Handlebars.compile(groupListWithoutUlTmpl)({ set_of_groups: groups });
 
     R.pageInit(groups, nbGroups);
 }

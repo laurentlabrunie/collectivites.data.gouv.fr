@@ -242,4 +242,13 @@ Z.reorgArray = function(arrayToUpdate) {
 })();
 
 
+Z.moreThan = function(container, limitNumber) {
+    if (container.children.length >= limitNumber) {
+        return true;
+    } else {
+        return false;
+    }
+};
+
+
 

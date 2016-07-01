@@ -15,6 +15,7 @@
     /* For IE 8*/
     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000)";
 }
+
 .popin {
     width:300px;
     height:200px;
@@ -71,6 +72,7 @@
 .popin_update_groups .block_modif input[type="button"],
 .popin_remove_groups .block_modif input[type="button"]{
     display: inline-block;
+    background: #D19EA2;
     border-radius:10px 10px;
     width:50%;
 }

@@ -7,7 +7,7 @@ POPIN.popUpdateForGroups = function(div, object) {
 
     var eltTo = Z.qs('.popin_update_groups .block_info');
     eltTo.id = eltFrom.id;
-    eltTo.innerHTML = '<p>Modification du libellé de la voie "' + eltFrom.dataset.value + '"</p>';
+    eltTo.innerHTML = '<p>Modification du libellé de la voie "' + eltFrom.textContent + '"</p>';
 
     eltTo = Z.qs('#group_name_new');
     eltTo.value = "";
@@ -17,11 +17,11 @@ POPIN.popUpdateForGroups = function(div, object) {
 
 // Ouverture de la popin en suppression
 POPIN.popRemoveForGroups = function(div, object) {
-    var eltFrom = Z.parents('LI', object);
+    var eltFrom = Z.parents('li', object);
 
     var eltTo = Z.qs('.popin_remove_groups .block_info');
     eltTo.id = eltFrom.id;
-    eltTo.innerHTML = '<p>Etes vous sûr de vouloir supprimer la voie "' + eltFrom.dataset.value + '"</p>';
+    eltTo.innerHTML = '<p>Etes vous sûr de vouloir supprimer la voie "' + eltFrom.textContent + '"</p>';
 
     return POPIN.pop(div);
 }
@@ -48,7 +48,6 @@ POPIN.updateAndHide = function(div, object) {
         Z.get({uri: uriGroup + '/group/' + eltId, callback: function (err, xhr) {
             if (err) return console.error(err);
             R.listComplete[id].name = eltFrom.value;
-            eltTo.dataset.value = R.listComplete[id].name;
             eltTo = Z.qs('#' + eltId + ' span');
             eltTo.textContent = R.listComplete[id].name;
 
@@ -62,7 +61,7 @@ POPIN.updateAndHide = function(div, object) {
 POPIN.removeAndHide = function(div, object) {
 
     var eltId = Z.qs('.popin_remove_groups .block_info').id;
-    var eltTo = Z.qs('#' + R.firstListName + ' #' + eltId);
+    var eltTo = Z.parents('li', Z.qs('#' + R.firstListName + ' #' + eltId));
     var id = R.getIdByBanId(eltId);
 
     // TODO: suppression en base

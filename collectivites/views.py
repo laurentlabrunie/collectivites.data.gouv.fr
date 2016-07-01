@@ -222,23 +222,29 @@ class MakeGroupList:
 
            Et c'est ensuite que l'on fait la comparaison... """
 
+
         nb_groups_before = len(self.list_groups)
+        self.num_group = 0
 
         while len(self.list_groups) != 0:
-            parent_id = self.list_groups[0]['id']
-            self.content_ordered.append(self.list_groups[0])
-            del self.list_groups[0]
-            self.compare_one_group_to_others(parent_id)
 
-        nb_groups_after = len(self.content_ordered)
+            """ parent_id = self.list_groups[0]['id'] """
+            group = dict()
+            group[self.num_group] = self.list_groups[0]
+            data_to_compare = group[self.num_group]['data_to_compare']
+            self.num_group += 1
+
+            del self.list_groups[0]
+            self.content_ordered.append(self.compare_one_group_to_others(group, data_to_compare))
+
+        nb_groups_after = self.num_group
 
         if nb_groups_before != nb_groups_after:
             raise ValueError('Fonction "compare_groups" : le nombre de voie est différent avant '
                                 'et après le traitement : Avant <' + str(nb_groups_before) + '> '
                                 'et Après <' + str(nb_groups_after) + '>')
 
-
-    def compare_one_group_to_others(self, parent_id):
+    def compare_one_group_to_others(self, group, data_to_compare):
 
         """ ...compare la dernière voie de la seconde liste avec toutes les autres voies de la première
            et identifie les doublons...
@@ -247,18 +253,17 @@ class MakeGroupList:
 
         index_group = 0
         nb_group = len(self.list_groups)
-        index_last_ordered = len(self.content_ordered)-1
+
         while nb_group > index_group:
-            if self.list_groups[index_group]['data_to_compare'] \
-                    == self.content_ordered[index_last_ordered]['data_to_compare']:
-                self.content_ordered[index_last_ordered]['class_parent'] = 'parent'
-                self.list_groups[index_group]['parent_id'] = parent_id
-                self.list_groups[index_group]['class_children'] = 'children'
-                self.content_ordered.append(self.list_groups[index_group])
+            if self.list_groups[index_group]['data_to_compare'] == data_to_compare:
+                group[self.num_group] = self.list_groups[index_group]
                 del self.list_groups[index_group]
                 nb_group -= 1
+                self.num_group += 1
             else:
                 index_group += 1
+
+        return group
 
     def add_municipality(self):
 

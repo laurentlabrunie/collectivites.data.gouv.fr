@@ -8,11 +8,11 @@
 .multigrid input[type='button'] {
     display: inline-block;
     margin:10px;
-    border-radius:10px 10px;
+    border: 2px outset black;
+    border-radius:5px 5px;
     width: 100px;
     height: 30px;
-    background: #A2BBD6;
-    background-image:radial-gradient(#D19EA2, white, #A2BBD6);
+    background: #D19EA2;
     text-align: center;
 }
 
@@ -21,24 +21,24 @@
 }
 
 .multigrid .block__search {
+    border: 2px solid black;
+    background: #D19EA2;
     border-radius:10px 10px;
     margin: auto;
     margin-top: 10px;
     margin-bottom : 10px;
-    width: 95%;
+    width: 99%;
 }
 
 .multigrid .block__search-accordion {
     border-radius:10px 10px 0px 0px;
     height: 20px;
-    background-image:radial-gradient(#D19EA2, white, #A2BBD6);
 }
 
 .multigrid .block__search-content {
     width: 100%;
     border-radius:0px 0px 10px 10px;
     height: 100px;
-    background-image:radial-gradient(#D19EA2, white, #A2BBD6);
 }
 
 .multigrid .block__search-content input[name="words"] {
@@ -53,31 +53,51 @@
 
 .multigrid .block__list{
     border-radius:10px 10px;
-    width: 45%;
+    width: 49%;
     margin: auto;
     height: 500px;
 }
 
 .multigrid .block__list-title h4{
     text-align: center;
+    border: 2px solid black;
     border-radius:10px 10px;
     line-height:50px;
     background: #D19EA2;
-    background-image:radial-gradient(#D19EA2, white, #A2BBD6);
 }
 
 .multigrid .block__list-content {
+    border-radius:10px 10px;
     line-height:40px;
     overflow: auto;
+    border: 2px solid black;
+}
+
+.multigrid .block__list-content ul {
+    width: 98%;
 }
 
 .multigrid .block__list-content li{
     display:flex;
-    background: #A2BBD6;
-    background-image:linear-gradient(15deg, #A2BBD6, white, #D19EA2);
+    border: 2px solid black;
+    background: #D19EA2;
     border-radius:10px 10px 10px 10px;
     padding: 0px 5px;
     margin: 5px;
+    width: 98%;
+}
+
+.multigrid .block__list-content ul ul {
+    width: 100%;
+}
+
+.multigrid .block__list-content li li{
+    width: 100%;
+}
+
+.multigrid #listUpdate .no_group,
+.multigrid #listUpdate .no_group_found {
+    display:none;
 }
 
 .multigrid .block__list-content input[type="radio"]{
@@ -85,16 +105,16 @@
 }
 
 .multigrid .block__list-content .groupname {
-    width:75%;
+    width:70%;
 }
 
 .multigrid .block__list-content .groupiconafter {
-    width:25%;
+    width:30%;
 }
 
 .multigrid .block__list-content .groupiconafter .glyphicon,
 .multigrid .block__list-content .groupname .glyphicon-hand-left {
-    border-width: 1px;
+    border-width: 2px;
     padding: 5px;
     border-style: outset;
     border-radius:5px 5px;
@@ -119,14 +139,11 @@
     margin-right: 5px;
 }
 
-.multigrid .block__list-content .children{
-    margin-left: 20px;
-}
-
-
 .multigrid .block__end {
     height:10%;
     text-align: center;
+    border-radius:10px 10px;
+    border: 2px solid black;
 }
 
 .multigrid .block__end input[type="button"] {

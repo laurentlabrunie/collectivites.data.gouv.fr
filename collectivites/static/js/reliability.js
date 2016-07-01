@@ -6,33 +6,32 @@ var R = {
     displayNo : 'none',
     displayYes : 'flex',
 
-    pageInit: function(groupList, nbGroups) {
+    pageInit: function(setList, nbGroups) {
         R.hideSearch();
-        R.listComplete = R.initList(groupList);
+        R.listComplete = R.initList(setList);
         R.nbDisplayedInFirstList = R.listComplete.length;
         R.verifyNbGroups(nbGroups);
+        R.nbDisplayedInFirstList = nbGroups;
         R.displayNbListComplete(nbGroups);
         R.displayNbFirstList();
     },
 
-    initList: function(groupList) {
+    initList: function(list) {
 
-        for (var key = 0; key < groupList.length; key++) {
-            groupList[key].listName = R.firstListName;
-            groupList[key].displayInFirstList = R.displayYes;
-        }
-        return groupList;
-    },
+        var key2 = 0;
+        var groupList = [];
 
-    getContentListByListName: function(listName) {
-        var list = [];
-
-        for (var key = 0; key < R.listComplete.length; key++) {
-            if (R.listComplete[key].listName == listName) {
-                list[key] = R.listComplete[key];
+        for (var key = 0; key < list.length; key++) {
+            while(list[key][key2]) {
+                groupList[key2] = list[key][key2];
+                groupList[key2].setId = key;
+                groupList[key2].listName = R.firstListName;
+                groupList[key2].displayInFirstList = R.displayYes;
+                key2++;
             }
         }
-        return list;
+
+        return groupList;
     },
 
     getContentFirstList: function() {
@@ -52,7 +51,26 @@ var R = {
             }
         }
         throw 'Erreur : L\'Id Ban (' + banId + ') n\'a pas été trouvé.'
-    }
+    },
+
+    getContentListBySetId: function(setId) {
+        return R.getContentListByProperty('setId', setId);
+    },
+
+    getContentListByListName: function(listName) {
+        return R.getContentListByProperty('listName', listName);
+    },
+
+    getContentListByProperty: function(propertyName, propertyValue) {
+        var list = [];
+
+        for (var key = 0; key < R.listComplete.length; key++) {
+            if (R.listComplete[key][propertyName] == propertyValue) {
+                list[key] = R.listComplete[key];
+            }
+        }
+        return list;
+    },
 
 };
 
@@ -67,50 +85,45 @@ R.verifyNbGroups = function(nbGroups) {
 R.moveIn = function(element, idWhere) {
 
     R.iconeManagement(element, idWhere);
+    R.HideOrShowSetWhereListChange(element, idWhere);
     var eltWhere = Z.qs(idWhere);
     eltWhere.appendChild(element);
     R.changeList(idWhere, element.id);
 }
 
-R.moveInButton = function(element, idWhere) {
-    var eltToMove = Z.parents('LI', element);
-    var isParent = eltToMove.classList.contains('parent');
+/* on cache le "set" de voie s'il n'y en a plus à l'intérieur
+ ou plus précisément lorsqu'il n'y en aura plus après le déplacement */
 
-    if (isParent) {
-        var childIds = R.getChildren(eltToMove);
-        R.moveIn(eltToMove, idWhere);
-        R.moveChilds(childIds, idWhere);
+R.HideOrShowSetWhereListChange = function(elt, idWhere) {
+    var idSet;
+
+    if (idWhere == '#' + R.secondListName) {
+        var idSetFrom = Z.parents('ul', elt);
+        idSet = Z.parents('li', idSetFrom);
+        if (!Z.moreThan(idSetFrom, 2)) {
+            Z.addClass(idSet, 'no_group');
+        }
+
     }
     else {
-        R.moveIn(eltToMove, idWhere);
+        idSet = Z.parents('li', Z.qs(idWhere));
+        Z.removeClass(idSet, 'no_group');
     }
+}
+
+R.moveInButton = function(element, idWhere) {
+    var eltToMove = Z.parents('LI', element);
+
+    if (idWhere == '#' + R.firstListName) {
+        idWhere = idWhere + " [id='" + eltToMove.dataset['set_id'] + "']";
+    }
+
+    R.moveIn(eltToMove, idWhere);
 
     R.activateButton();
     R.displayNbFirstList();
 
-}
-
-R.getChildren = function(element) {
-    var idParent = element.id;
-    var ulParent = Z.parents('UL', element);
-    var listIdChilds = new Array();
-
-    for (var eltNb = 0; eltNb < ulParent.children.length; eltNb++) {
-        var elt = ulParent.children[eltNb];
-
-        if (elt.dataset.parent_id == idParent) {
-            listIdChilds.push(elt.id);
-        }
-    }
-    return listIdChilds;
-}
-
-R.moveChilds = function(childIds, idWhere) {
-    for (var idNb = 0; idNb < childIds.length; idNb++) {
-        var eltToMove = Z.qs('#' + childIds[idNb]);
-        eltToMove.style.display = R.displayYes;
-        R.moveIn(eltToMove, idWhere);
-    }
+    return
 }
 
 R.iconeManagement = function(eltToMove, idWhere) {
@@ -124,7 +137,7 @@ R.iconeManagement = function(eltToMove, idWhere) {
                     .replace('<i class="' + listIcones['children'] + '"></i>', '');
             eltToMove.children[1].innerHTML = groupRadio;
             break;
-        case R.firstListName:
+        default:
             eltToMove.children[0].removeChild(eltToMove.children[0].firstChild);
             eltToMove.children[1].innerHTML = groupIconAfter;
             break;
@@ -136,7 +149,9 @@ R.changeList = function(idWhere, banId) {
     var group = R.listComplete[id];
     var elt =  Z.qs(idWhere + ' #' + banId);
 
-    if (idWhere == '#' + R.secondListName) {
+    idWhere = idWhere.split(' ')[0].replace('#','');
+
+    if (idWhere == R.secondListName) {
         if( group.displayInFirstList == R.displayYes ) {
             R.decreaseNbFirstList();
         }
@@ -149,7 +164,8 @@ R.changeList = function(idWhere, banId) {
         elt.style.display = group.displayInFirstList;
     }
 
-    R.listComplete[id].listName = idWhere.replace('#','');
+    R.listComplete[id].listName = idWhere;
+
 }
 
 
@@ -167,14 +183,6 @@ R.displayUpdate = function(radioClicked) {
     R.activateButton();
 }
 
-R.moreThan = function(container, limitNumber) {
-    if (container.children.length >= limitNumber) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
 R.radioActivatedOnce = function() {
     var elts = Z.qsa('#' + R.secondListName + ' input[type="radio"]');
 
@@ -190,7 +198,7 @@ R.activateButton = function() {
     var container = Z.qs('#' + R.secondListName);
     var state = true;
 
-    var moreThanTwoInSas = R.moreThan(container, 2);
+    var moreThanTwoInSas = Z.moreThan(container, 2);
     var radioActivated = R.radioActivatedOnce();
 
     if (moreThanTwoInSas && radioActivated) {
@@ -259,29 +267,55 @@ R.searchWordsInListUpdate= function(wordsList) {
 R.search = function(listDisplayed) {
     var list = R.listComplete;
     var display;
+    var key2;
+    var endOfLoop;
+    var oldSetId = null;
 
     R.nbDisplayedInFirstList = 0;
 
     for (var key = 0; key < list.length; key++) {
         display = R.displayNo;
+        key2 = 0;
+        endOfLoop = false;
 
-        for (var key2 = 0; key2 < listDisplayed.length; key2++) {
+        do {
             if (list[key]['id'] == listDisplayed[key2]['id']) {
                 display = R.displayYes;
+                endOfLoop = true;
             }
-        }
+            key2++;
+            if(!listDisplayed[key2]) {
+                endOfLoop = true;
+            }
+        } while (!endOfLoop);
 
         R.listComplete[key].displayInFirstList = display;
 
         var elt = Z.qs('#' + list[key]['id']);
-        var parent = elt.parentElement.id;
+        var parentUl = Z.parents('ul', elt);
+        var setId =  R.listComplete[key].setId;
 
-        if (parent == R.firstListName ) {
+        if (parentUl.id != R.secondListName ) {
             elt.style.display = display;
-            if (display ==  R.displayYes) R.nbDisplayedInFirstList++;
+            if (display == R.displayYes) R.nbDisplayedInFirstList++;
+        }
+        else {
+            var parentUl = Z.qs('ul [id="' + setId + '"]');
+        }
+
+        var parentLi = Z.parents('li', parentUl);
+
+        if (setId != oldSetId) {
+            oldSetId = setId;
+            // Evite la redondance de la classe
+            if (!Z.hasClass(parentLi, 'no_group_found')) {Z.addClass(parentLi, 'no_group_found');console.log(setId);}
+        }
+
+        if (display == R.displayYes) {
+            Z.removeClass(parentLi, 'no_group_found');
         }
     }
-console.log(R.nbDisplayedInFirstList);
+
     R.displayNbFirstList();
 }
 
