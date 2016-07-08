@@ -9,7 +9,7 @@ from werkzeug import security
 
 from . import app
 from . import utils
-from addr_utils import AddrGroup
+from . import addr_utils
 
 
 @app.route('/')
@@ -159,6 +159,7 @@ def ban_duplication():
 
 @app.route('/ban/reliability', methods=['POST'])
 def ban_reliability():
+
     list_content = utils.decode_and_unjson(request.form['list'])
     nb_groups = len(list_content['groups'])
     make_file = MakeGroupList(list_content)
@@ -188,30 +189,9 @@ class MakeGroupList:
 
         for group in self.list_groups:
 
-            addr = AddrGroup(group['name'])
+            addr = addr_utils.AddrGroup(group['name'])
             group['data_to_compare'] = addr.guess_typeof_street + addr.guess_strong_word
-            group['message_alert'] = self.construction_message(addr)
-
-    def construction_message(self, addr):
-
-        """ """
-
-        message_alert = ''
-        message_content = []
-
-        if addr.is_label_only_uppercased:
-            message_content.append('Tous les caractères sont en majuscule')
-        if (addr.is_label_bad_capitalized):
-            message_content.append('Des caractères sont mal capitalisés')
-        if (addr.is_label_with_repetition):
-            message_content.append('Des mots sont en double')
-
-        if len(message_content) != 0:
-            message_alert = 'Mauvais libellé :'
-            for value in message_content:
-                    message_alert = message_alert + '\n - ' + value
-
-        return message_alert
+            group['message_alert'] = addr_utils.construction_message(addr)
 
     def compare_groups(self):
 
@@ -283,3 +263,19 @@ class MakeGroupList:
         self.compare_groups()
         self.add_municipality()
         return self.content_complete
+
+
+@app.route('/ban/verification', methods=['GET'])
+def ban_verification():
+    req = request
+    group_name = request.args['groupName']
+    addr = addr_utils.AddrGroup(group_name)
+    message_alert = addr_utils.construction_message(addr)
+
+    if message_alert == "":
+        alert = False
+    else:
+        alert = True
+
+    return utils.json.dumps({'alert': alert, 'message_alert': message_alert})
+

@@ -452,6 +452,27 @@ class AddrGroup:
         return ((self._stateof_label & self.LABEL_WITH_REPETITION_ERROR) == self.LABEL_WITH_REPETITION_ERROR)
 
 
+def construction_message(addr):
+
+    """ construit le message d'alerte en fonction des éléments détectés """
+
+    message_alert = ''
+    message_content = []
+
+    if addr.is_label_only_uppercased:
+        message_content.append('Tous les caractères sont en majuscule')
+    if (addr.is_label_bad_capitalized):
+        message_content.append('Des caractères sont mal capitalisés')
+    if (addr.is_label_with_repetition):
+        message_content.append('Des mots sont en double')
+
+    if len(message_content) != 0:
+        message_alert = 'Mauvais libellé :'
+        for value in message_content:
+                message_alert = message_alert + '\n - ' + value
+
+    return message_alert
+
 # for tests
 if __name__ == '__main__':
     while True:

@@ -308,7 +308,7 @@ R.search = function(listDisplayed) {
         if (setId != oldSetId) {
             oldSetId = setId;
             // Evite la redondance de la classe
-            if (!Z.hasClass(parentLi, 'no_group_found')) {Z.addClass(parentLi, 'no_group_found');console.log(setId);}
+            if (!Z.hasClass(parentLi, 'no_group_found')) Z.addClass(parentLi, 'no_group_found');
         }
 
         if (display == R.displayYes) {

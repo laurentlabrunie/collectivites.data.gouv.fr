@@ -73,6 +73,12 @@
 .popin_remove_groups .block_modif input[type="button"]{
     display: inline-block;
     background: #D19EA2;
-    border-radius:10px 10px;
+    border-radius:10px 0px;
     width:50%;
+}
+
+.popin_update_groups .block_alert p {
+    margin: 10px;
+    color: red;
+    font-weight: bold;
 }
