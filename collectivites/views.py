@@ -233,6 +233,7 @@ class MakeGroupList:
 
         index_group = 0
         nb_group = len(self.list_groups)
+        length = 1
 
         while nb_group > index_group:
             if self.list_groups[index_group]['data_to_compare'] == data_to_compare:
@@ -240,9 +241,11 @@ class MakeGroupList:
                 del self.list_groups[index_group]
                 nb_group -= 1
                 self.num_group += 1
+                length += 1
             else:
                 index_group += 1
 
+        group['length'] = length
         return group
 
     def add_municipality(self):
@@ -267,7 +270,7 @@ class MakeGroupList:
 
 @app.route('/ban/verification', methods=['GET'])
 def ban_verification():
-    req = request
+
     group_name = request.args['groupName']
     addr = addr_utils.AddrGroup(group_name)
     message_alert = addr_utils.construction_message(addr)

@@ -113,30 +113,30 @@
     width:25%;
 }
 
-.multigrid .block__list-content .groupiconafter .glyphicon,
-.multigrid .block__list-content .groupname .glyphicon-hand-left {
+.multigrid .block__list-content .buttonIcon {
     border-width: 2px;
     padding: 5px;
     border-style: outset;
     border-radius:10px 0px;
-}
-
-.multigrid .groupiconafter .glyphicon,
-.multigrid .glyphicon-hand-left {
     cursor: pointer;
 }
 
-.multigrid .block__list-content .groupiconafter .glyphicon:active,
-.multigrid .block__list-content .groupname .glyphicon-hand-left:active {
+.multigrid .block__list-content .buttonIcon:active {
     border-style: inset;
+}
+
+.multigrid .block__list-content .moveAll .buttonIcon {
+    width:100%;
+    text-align: center;
 }
 
 .multigrid .glyphicon-warning-sign,
 .multigrid .glyphicon-info-sign {
     cursor: help;
+    margin-right: 5px;
 }
 
-.multigrid .groupname .glyphicon {
+.multigrid .groupname .buttonIcon {
     margin-right: 5px;
 }
 
@@ -165,4 +165,16 @@
 
 .multigrid #listSelect .updatebtn {
     display: none;
+}
+
+.multigrid #listUpdate .block__all {
+    display:none;
+}
+
+.multigrid #listUpdate [class="block__all block__all_display"] {
+    display:flex;
+}
+
+.multigrid #listUpdate .word_not_found {
+    display:none;
 }

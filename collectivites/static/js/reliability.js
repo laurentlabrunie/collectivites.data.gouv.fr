@@ -53,12 +53,14 @@ var R = {
         throw 'Erreur : L\'Id Ban (' + banId + ') n\'a pas été trouvé.'
     },
 
-    getContentListBySetId: function(setId) {
-        return R.getContentListByProperty('setId', setId);
+    getContentListBySetId: function(setId, displayed = false) {
+        var list = R.getContentListByProperty('setId', setId);
+        return list;
     },
 
     getContentListByListName: function(listName) {
-        return R.getContentListByProperty('listName', listName);
+        var list = R.getContentListByProperty('listName', listName);
+        return list;
     },
 
     getContentListByProperty: function(propertyName, propertyValue) {
@@ -71,6 +73,28 @@ var R = {
         }
         return list;
     },
+
+    getContentListDisplayedBySetId: function(setId) {
+        var list = [];
+
+        for (var key = 0; key < R.listComplete.length; key++) {
+            if (R.listComplete[key]['setId'] == setId
+                    && R.listComplete[key]['displayInFirstList'] == R.displayYes
+                    && R.listComplete[key]['listName'] == R.firstListName){
+                list[key] = R.listComplete[key];
+            }
+        }
+        return list;
+    },
+
+    getNbElementInList: function(list) {
+        var nbElt  = 0;
+        list.forEach(function() {
+            nbElt++;
+        });
+
+        return nbElt;
+    }
 
 };
 
@@ -89,25 +113,41 @@ R.moveIn = function(element, idWhere) {
     var eltWhere = Z.qs(idWhere);
     eltWhere.appendChild(element);
     R.changeList(idWhere, element.id);
+
 }
 
-/* on cache le "set" de voie s'il n'y en a plus à l'intérieur
- ou plus précisément lorsqu'il n'y en aura plus après le déplacement */
+R.moveAllButton = function(element) {
+
+    var idSetFrom = Z.parents('ul', element);
+    var setId = idSetFrom.id;
+    var list = R.getContentListDisplayedBySetId(setId);
+
+    list.forEach(function(eltToMove) {
+        R.moveIn(Z.qs('#' + eltToMove.id), '#' + R.secondListName);
+    });
+
+    R.activateButton();
+    R.displayNbFirstList();
+}
+
+/* on cache le "set" de voie s'il n'y en a plus à l'intérieur */
 
 R.HideOrShowSetWhereListChange = function(elt, idWhere) {
-    var idSet;
+    var li;
 
     if (idWhere == '#' + R.secondListName) {
-        var idSetFrom = Z.parents('ul', elt);
-        idSet = Z.parents('li', idSetFrom);
-        if (!Z.moreThan(idSetFrom, 2)) {
-            Z.addClass(idSet, 'no_group');
-        }
+        var ulFrom = Z.parents('ul', elt);
+        li = Z.parents('li', ulFrom);
 
+        var list = R.getContentListDisplayedBySetId(ulFrom.id);
+        var nbElt = R.getNbElementInList(list);
+        if (nbElt <= 1) {
+            Z.addClass(li, 'no_group');
+        }
     }
     else {
-        idSet = Z.parents('li', Z.qs(idWhere));
-        Z.removeClass(idSet, 'no_group');
+        li = Z.parents('li', Z.qs(idWhere));
+        Z.removeClass(li, 'no_group');
     }
 }
 
@@ -122,19 +162,15 @@ R.moveInButton = function(element, idWhere) {
 
     R.activateButton();
     R.displayNbFirstList();
+    R.blocAllDisplayed(eltToMove.dataset['set_id']);
 
-    return
 }
 
 R.iconeManagement = function(eltToMove, idWhere) {
     idWhere = idWhere.replace ('#','');
     switch(idWhere) {
         case R.secondListName:
-            eltToMove.classList.remove("children");
-            eltToMove.classList.remove("parent");
             eltToMove.children[0].innerHTML = groupIconBefore + eltToMove.children[0].innerHTML
-                    .replace('<i class="' + listIcones['parent'] + '"></i>', '')
-                    .replace('<i class="' + listIcones['children'] + '"></i>', '');
             eltToMove.children[1].innerHTML = groupRadio;
             break;
         default:
@@ -155,17 +191,14 @@ R.changeList = function(idWhere, banId) {
         if( group.displayInFirstList == R.displayYes ) {
             R.decreaseNbFirstList();
         }
-        elt.style.display = R.displayYes;
     }
     else {
         if( group.displayInFirstList == R.displayYes ) {
             R.increaseNbFirstList();
         }
-        elt.style.display = group.displayInFirstList;
     }
 
     R.listComplete[id].listName = idWhere;
-
 }
 
 
@@ -296,8 +329,13 @@ R.search = function(listDisplayed) {
         var setId =  R.listComplete[key].setId;
 
         if (parentUl.id != R.secondListName ) {
-            elt.style.display = display;
-            if (display == R.displayYes) R.nbDisplayedInFirstList++;
+            if (display == R.displayYes) {
+                R.nbDisplayedInFirstList++;
+                R.removeClass(elt, 'word_not_found');
+            }
+            else {
+                R.addClass(elt, 'word_not_found');
+            }
         }
         else {
             var parentUl = Z.qs('ul [id="' + setId + '"]');
@@ -306,16 +344,16 @@ R.search = function(listDisplayed) {
         var parentLi = Z.parents('li', parentUl);
 
         if (setId != oldSetId) {
+            if (oldSetId != null)   R.blocAllDisplayed(oldSetId);
             oldSetId = setId;
-            // Evite la redondance de la classe
-            if (!Z.hasClass(parentLi, 'no_group_found')) Z.addClass(parentLi, 'no_group_found');
+            R.addClass(parentLi, 'no_group_found');
         }
-
         if (display == R.displayYes) {
-            Z.removeClass(parentLi, 'no_group_found');
+            R.removeClass(parentLi, 'no_group_found');
         }
     }
 
+    R.blocAllDisplayed(oldSetId);
     R.displayNbFirstList();
 }
 
@@ -347,4 +385,25 @@ R.decreaseNbListComplete = function() {
 
 R.displayNbListComplete = function(nb) {
     Z.qs('#nbtotal').textContent = nb;
+}
+
+R.blocAllDisplayed = function(setId) {
+    var list = R.getContentListDisplayedBySetId(setId);
+    var nbElt = R.getNbElementInList(list);
+    var eltMoveAll = Z.qs('#moveAll-' + setId);
+
+    if (nbElt < 2) {
+        R.removeClass(eltMoveAll, 'block__all_display');
+    }
+    else {
+        R.addClass(eltMoveAll, 'block__all_display');
+    }
+}
+
+R.addClass = function(element, className) {
+    if (!Z.hasClass(element, className)) Z.addClass(element, className);
+}
+
+R.removeClass = function (element, className) {
+    if (Z.hasClass(element, className)) Z.removeClass(element, className);
 }

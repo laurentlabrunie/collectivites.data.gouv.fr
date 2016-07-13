@@ -96,8 +96,8 @@ BAN.displaySelectorMunicipalityForDuplicate = function (selector1, selector2) {
 /* Récupère la liste totale des voies pour une commune à partir du numéro insee
         et la met en session sous forme JSON */
 
-var uriGroup = 'http://ban-dev.data.gouv.fr';
-//var uriGroup = 'http://localhost:5959';
+//var uriGroup = 'http://ban-dev.data.gouv.fr';
+var uriGroup = 'http://localhost:5959';
 var event = new CustomEvent('endOfLoad');
 var groupsJSONToArray = [];
 var groupsMunicipalityArray = [];
@@ -125,6 +125,7 @@ BAN.listGroupsComplete = function (selector, municipality) {
 BAN.banGroups = function (selector, url) {
             Z.get({ uri: url , callback: function (err, xhr) {
                 if (err) return console.error(err);
+                console.log(xhr.responseText);
                 JSONObj = JSON.parse(xhr.responseText);
                 groupsJSONToArray = groupsJSONToArray.concat(JSONObj.collection);
 
@@ -154,26 +155,35 @@ var listIcones = {
 }
 
 var groupIconAfter = '<a href="#" onClick="return POPIN.popUpdateForGroups(\'upd_groups\', this)">'
-        +   '<i class="' + listIcones['edit'] + '" title="Modifier le libellé de la voie"></i>'
+        +   '<i class="buttonIcon ' + listIcones['edit'] + '" title="Modifier le libellé de la voie"></i>'
         + '</a>'
         + '<a href="#" onClick="return POPIN.popRemoveForGroups(\'rem_groups\', this)">'
-        +   '<i class="' + listIcones['remove'] + '" title="Supprimer la voie"></i>'
+        +   '<i class="buttonIcon ' + listIcones['remove'] + '" title="Supprimer la voie"></i>'
         + '</a>'
         + '<a href="#" onClick="R.moveInButton(this, \'#listSelect\')">'
-        +   '<i class="' + listIcones['gotoright'] + '" title="Déplacer dans le sas de fiabilisation"></i>'
+        +   '<i class="buttonIcon ' + listIcones['gotoright'] + '" title="Déplacer dans le sas de fiabilisation"></i>'
         + '</a>';
 var groupRadio = '<INPUT type="radio" name="groupselect" onclick="R.displayUpdate(this)">'
         + '<a href="#" class="updatebtn" onClick="return POPIN.popUpdateForGroups(\'upd_groups\', this)">'
-        +   '<i class="' + listIcones['edit'] + '" title="Modifier le libellé de la voie"></i>'
+        +   '<i class="buttonIcon ' + listIcones['edit'] + '" title="Modifier le libellé de la voie"></i>'
         + '</a>';
 var groupIconBefore = '<a href="#" onClick="R.moveInButton(this, \'#listUpdate\')">'
-        +   '<i class="' + listIcones['gotoleft'] + '" title="Déplacer dans la liste des voies"></i>'
+        +   '<i class="buttonIcon ' + listIcones['gotoleft'] + '" title="Déplacer dans la liste des voies"></i>'
         + '</a>';
 
 var groupListWithoutUlTmpl = '{{#each set_of_groups as |groups_in_set num_set|}}'
         +'<li class="block__set_of_groups block__set_of_groups_with_groups">'
         +   '<ul id="{{@num_set}}">'
+        +       '<li class="block__all {{#if_sup groups_in_set.length 1}}block__all_display{{/if_sup}}" id="moveAll-{{@num_set}}" data-set_id="{{@num_set}}">'
+        +           '<div class="groupname"></div>'
+        +           '<div class="groupiconafter moveAll" >'
+        +               '<a href="#" onClick="R.moveAllButton(this)">'
+        +                   '<i class="buttonIcon ' + listIcones['gotoright'] + '" title="Déplacer dans le sas de fiabilisation"></i>'
+        +               '</a>'
+        +           '</div>'
+        +       '</li>'
         +   '{{#each groups_in_set as |group num_group_in_set|}}'
+        +       '{{#if_diff num_group_in_set "length"}}'
         +       '<li class="block__group" id={{id}} data-set_id="{{@num_set}}" data-group_id="{{@num_group_in_set}}">'
         +           '<div class="groupname" >'
         +               '{{# if message_alert}}<i class="' + listIcones['warning'] + '" '
@@ -182,6 +192,7 @@ var groupListWithoutUlTmpl = '{{#each set_of_groups as |groups_in_set num_set|}}
         +           '</div>'
         +           '<div class="groupiconafter">' + groupIconAfter + '</div>'
         +       '</li>'
+        +       '{{/if_diff}}'
         +   '{{/each}}'
         +   '</ul>'
         +'</li>{{/each}}';
@@ -193,10 +204,8 @@ BAN.displayGroups = function(encodedGroups, nbGroups) {
     var citycode = JSON.parse(JSONgroups).citycode;
     var groups = JSON.parse(JSONgroups).groups;
 
-    Z.qs("#pagetitle").innerHTML = 'Commune de ' + municipality + ' (' + citycode + ')';
-
+    Z.qs("#pagetitle").inner;
     listUpdate.innerHTML = Handlebars.compile(groupListWithoutUlTmpl)({ set_of_groups: groups });
-
     R.pageInit(groups, nbGroups);
 }
 
