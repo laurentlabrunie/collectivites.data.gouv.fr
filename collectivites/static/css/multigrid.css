@@ -1,6 +1,5 @@
 
 .multigrid {
-    display:flex;
     flex-direction: column;
     width: 100%;
 }
@@ -15,8 +14,30 @@
     text-align: center;
 }
 
-.multigrid [type="button"]:disabled{
+.multigrid [type="button"]:disabled {
     color: grey;
+}
+
+.buttonHidden {
+    display: none;
+}
+
+.multigrid .buttonIcon {
+    background: #D19EA2;
+    border-width: 2px;
+    padding: 5px;
+    border-style: outset;
+    border-radius:10px 0px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.multigrid .buttonIcon:active {
+    border-style: inset;
+}
+
+.multigrid .moveAll .buttonIcon {
+    width:100%;
 }
 
 .multigrid .block__search {
@@ -76,7 +97,7 @@
     width: 98%;
 }
 
-.multigrid .block__list-content li{
+.multigrid .block__list-content li {
     display:flex;
     border: 2px solid black;
     background: #D19EA2;
@@ -96,6 +117,7 @@
     border-bottom: 1px solid black;
 }
 
+.multigrid #listUpdate .not_displayed_in_pagination,
 .multigrid #listUpdate .no_group,
 .multigrid #listUpdate .no_group_found {
     display:none;
@@ -111,23 +133,6 @@
 
 .multigrid .block__list-content .groupiconafter {
     width:25%;
-}
-
-.multigrid .block__list-content .buttonIcon {
-    border-width: 2px;
-    padding: 5px;
-    border-style: outset;
-    border-radius:10px 0px;
-    cursor: pointer;
-}
-
-.multigrid .block__list-content .buttonIcon:active {
-    border-style: inset;
-}
-
-.multigrid .block__list-content .moveAll .buttonIcon {
-    width:100%;
-    text-align: center;
 }
 
 .multigrid .glyphicon-warning-sign,
@@ -148,6 +153,10 @@
     border-top: none;
 }
 
+.multigrid .block__end .buttonIcon{
+    margin-top: 10px;
+}
+
 .multigrid .block__end input[type="button"] {
     width: 200px;
     text-align: center;
@@ -155,10 +164,12 @@
 
 .multigrid #listUpdate {
     height:100%;
+    border-radius: 10px 10px 0px 0px;
+    border-bottom: none;
 }
 
 .multigrid #listSelect {
-    height:90%;
+    height:100%;
     border-radius: 10px 10px 0px 0px;
     border-bottom: none;
 }
@@ -178,3 +189,4 @@
 .multigrid #listUpdate .word_not_found {
     display:none;
 }
+

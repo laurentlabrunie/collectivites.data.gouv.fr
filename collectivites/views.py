@@ -267,6 +267,28 @@ class MakeGroupList:
         self.add_municipality()
         return self.content_complete
 
+@with_ban_session
+@app.route('/ban/update', methods=['GET', 'POST'])
+def ban_update():
+    token = session.get('ban_token')
+    auth = "Bearer {}".format(token)
+    req = request
+    url = request.args['url']
+    name = request.args['name']
+    resp = requests.post(url, data={'name': name}, headers={'Authorization': auth})
+    return auth
+
+@with_ban_session
+@app.route('/ban/select', methods=['GET', 'POST'])
+def ban_select():
+    token = session.get('ban_token')
+    auth = "Bearer {}".format(token)
+    req = request
+    url = request.args['url']
+    resp = requests.get(url)
+    r=resp.status_code
+    return resp.text
+
 
 @app.route('/ban/verification', methods=['GET'])
 def ban_verification():

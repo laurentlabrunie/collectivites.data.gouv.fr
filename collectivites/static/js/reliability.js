@@ -6,6 +6,21 @@ var R = {
     displayNo : 'none',
     displayYes : 'flex',
 
+    listIcones: {
+        'edit': 'glyphicon glyphicon-pencil',
+        'remove': 'glyphicon glyphicon-trash',
+        'gotoright': 'glyphicon glyphicon-hand-right',
+        'gotoleft': 'glyphicon glyphicon-hand-left',
+        'children': 'glyphicon glyphicon-chevron-right',
+        'parent': 'glyphicon glyphicon-chevron-down',
+        'warning': 'glyphicon glyphicon-warning-sign',
+        'close': 'glyphicon glyphicon-remove',
+        'first': 'glyphicon glyphicon-fast-backward',
+        'previous': 'glyphicon glyphicon-backward',
+        'next': 'glyphicon glyphicon-forward',
+        'end': 'glyphicon glyphicon-fast-forward'
+    },
+
     pageInit: function(setList, nbGroups) {
         R.hideSearch();
         R.listComplete = R.initList(setList);
@@ -104,6 +119,56 @@ R.verifyNbGroups = function(nbGroups) {
         throw error_message;
     }
 }
+
+ // ---------------------------------- Affiche la liste des voies d'une commune ----------------------------------------------------
+
+
+R.groupIconAfter = '<a href="#" onClick="return POPIN.popUpdateForGroups(\'upd_groups\', this)"><i class="buttonIcon ' + R.listIcones['edit'] + '" title="Modifier le libellé de la voie"></i></a>'
+        + '<a href="#" onClick="return POPIN.popRemoveForGroups(\'rem_groups\', this)"><i class="buttonIcon ' + R.listIcones['remove'] + '" title="Supprimer la voie"></i></a>'
+        + '<a href="#" onClick="R.moveInButton(this, \'#listSelect\')"><i class="buttonIcon ' + R.listIcones['gotoright'] + '" title="Déplacer dans le sas de fiabilisation"></i></a>';
+R.groupRadio = '<INPUT type="radio" name="groupselect" onclick="R.displayUpdate(this)">'
+        + '<a href="#" class="updatebtn" onClick="return POPIN.popUpdateForGroups(\'upd_groups\', this)"><i class="buttonIcon ' + R.listIcones['edit'] + '" title="Modifier le libellé de la voie"></i></a>';
+R.groupIconBefore = '<a href="#" onClick="R.moveInButton(this, \'#listUpdate\')"><i class="buttonIcon ' + R.listIcones['gotoleft'] + '" title="Déplacer dans la liste des voies"></i></a>';
+
+R.groupListWithoutUlTmpl = '{{#each set_of_groups as |groups_in_set num_set|}}'
+        +'<li class="block__set_of_groups{{#if_sup @num_set ' + (N.pagination - 1)   + '}} not_displayed_in_pagination{{/if_sup}}">'
+        +   '<ul id="{{@num_set}}">'
+        +       '<li class="block__all{{#if_sup groups_in_set.length 1}} block__all_display{{/if_sup}}" id="moveAll-{{@num_set}}" data-set_id="{{@num_set}}">'
+        +           '<div class="groupname"></div>'
+        +           '<div class="groupiconafter moveAll" >'
+        +               '<a href="#" onClick="R.moveAllButton(this)">'
+        +                   '<i class="buttonIcon ' + R.listIcones['gotoright'] + '" title="Déplacer dans le sas de fiabilisation"></i>'
+        +               '</a>'
+        +           '</div>'
+        +       '</li>'
+        +   '{{#each groups_in_set as |group num_group_in_set|}}'
+        +       '{{#if_diff num_group_in_set "length"}}'
+        +       '<li class="block__group" id={{id}} data-set_id="{{@num_set}}" data-group_id="{{@num_group_in_set}}">'
+        +           '<div class="groupname" >'
+        +               '{{# if message_alert}}<i class="' + R.listIcones['warning'] + '" '
+        +                   'title="{{message_alert}}">'
+        +               '</i>{{/if}}<span>{{name}}</span>'
+        +           '</div>'
+        +           '<div class="groupiconafter">' + R.groupIconAfter + '</div>'
+        +       '</li>'
+        +       '{{/if_diff}}'
+        +   '{{/each}}'
+        +   '</ul>'
+        +'</li>{{/each}}';
+
+R.displayGroups = function(encodedGroups, nbGroups) {
+    var JSONgroups = decodeURIComponent(encodedGroups);
+    var municipality = JSON.parse(JSONgroups).name;
+    var citycode = JSON.parse(JSONgroups).citycode;
+    var groups = JSON.parse(JSONgroups).groups;
+
+    Z.qs("#pagetitle").innerHTML = 'Commune de ' + municipality + ' (' + citycode + ')';
+
+    listUpdate.innerHTML = Handlebars.compile(R.groupListWithoutUlTmpl)({ set_of_groups: groups });
+
+    R.pageInit(groups, nbGroups);
+}
+
  // ----------------------------------Gestion des mouvements d'une liste à l'autre ------------------------------------
 
 R.moveIn = function(element, idWhere) {
@@ -113,7 +178,6 @@ R.moveIn = function(element, idWhere) {
     var eltWhere = Z.qs(idWhere);
     eltWhere.appendChild(element);
     R.changeList(idWhere, element.id);
-
 }
 
 R.moveAllButton = function(element) {
@@ -163,6 +227,7 @@ R.moveInButton = function(element, idWhere) {
     R.activateButton();
     R.displayNbFirstList();
     R.blocAllDisplayed(eltToMove.dataset['set_id']);
+    N.afterAction();
 
 }
 
@@ -170,12 +235,12 @@ R.iconeManagement = function(eltToMove, idWhere) {
     idWhere = idWhere.replace ('#','');
     switch(idWhere) {
         case R.secondListName:
-            eltToMove.children[0].innerHTML = groupIconBefore + eltToMove.children[0].innerHTML
-            eltToMove.children[1].innerHTML = groupRadio;
+            eltToMove.children[0].innerHTML = R.groupIconBefore + eltToMove.children[0].innerHTML
+            eltToMove.children[1].innerHTML = R.groupRadio;
             break;
         default:
             eltToMove.children[0].removeChild(eltToMove.children[0].firstChild);
-            eltToMove.children[1].innerHTML = groupIconAfter;
+            eltToMove.children[1].innerHTML = R.groupIconAfter;
             break;
     }
 }
@@ -269,6 +334,7 @@ R.activateSearch = function() {
 
     var listToShow = R.wordSearch();
     R.search(listToShow);
+    N.afterAction();
 }
 
 R.wordSearch = function() {

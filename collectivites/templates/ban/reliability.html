@@ -1,5 +1,13 @@
 {% extends 'base.html' %}
 
+{% block extrahead %}
+    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/reliability.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/popin.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/managegroups.js') }}"></script>
+
+{% endblock %}
+
 {% block content %}
 <div class="container" id="groups" >
     <div class="headerpage">
@@ -12,14 +20,8 @@
 
             <div class="block__search">
                 <div class="block__search-accordion">
-                    <a href="#" onClick="R.showSearch()">
-                        <i class="glyphicon glyphicon-plus" title="Déplier la zone de recherche">
-                        </i>
-                    </a>
-                    <a href="#" onClick="R.hideSearch()">
-                        <i class="glyphicon glyphicon-minus" title="Replier la zone de recherche">
-                        </i>
-                    </a>
+                    <a href="#" onClick="R.showSearch()"><i class="glyphicon glyphicon-plus" title="Déplier la zone de recherche"></i></a>
+                    <a href="#" onClick="R.hideSearch()"><i class="glyphicon glyphicon-minus" title="Replier la zone de recherche"></i></a>
                 </div>
                 <div class="block__search-content">
                     <input type="text" name="words" placeholder="Recherche par mots" />
@@ -37,12 +39,14 @@
                 </div>
                 <ul class="block__list-content" id="listUpdate">
                 </ul>
+                <div class="block__end">
+                    {% include 'helper/navigation.html' %}
+                </div>
             </div>
             <div class="block__list">
                 <div class="block__list-title">
                     <h4>Sas de fiabilisation <i class="glyphicon glyphicon-info-sign"
                             title="Pour une même voie, rajouter les doublons identifiés et sélectionner le bon libellé ou celui qui correspond à la bonne voie et renseigner le libellé correctement">
-
                         </i>
                     </h4>
                 </div>
@@ -59,7 +63,7 @@
 {% include 'helper/removegroups.html' %}
 
 <script>
-    BAN.displayGroups("{{ groups }}", "{{ nb_groups }}");
-
+    R.displayGroups("{{ groups }}", "{{ nb_groups }}");
+    N.initPagination();
 </script>
 {% endblock content %}

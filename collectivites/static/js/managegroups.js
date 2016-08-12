@@ -1,5 +1,4 @@
 'use strict';
- var popupClosed = new CustomEvent('onPopupClose');
 
 // Ouverture de la popin en modification
 POPIN.popUpdateForGroups = function(div, object) {
@@ -43,31 +42,42 @@ POPIN.updateAndHide = function(div, object) {
     if (eltFrom.value == "") {
         alert('Le libellé ne doit pas être vide. Veuillez renseigner le bon libellé.');
         return;
-        }
+    }
 
     if (eltTo.textContent != eltFrom.value) {
+
 
     Z.get({uri: "verification?groupName=" + eltFrom.value, callback: function (err, xhr) {
         if (err) return console.error(err);
 
-        var alertResponse = JSON.parse(xhr.response);
+        var alertResponse = JSON.parse(xhr.responseText);
         if (alertResponse.alert == true) {
             warning.innerHTML = alertResponse.message_alert.replace(/\n/g, '<br />');
         }
         else {
-            // TODO: ne modifie que l'affichage : optimiser lors de l'accès à la base
-            // TODO: Faudra vérifier si la nouvelle valeur est conforme (avertissement si ce n'est pas le cas),
-            // TODO: mettre à jour la base puis récupérer la nouvelle valeur en base et mettre à jour l'affichage
-            // TODO: (avertissement si non conforme).
-            // (on va chercher la donnée dans la ban mais on ne s'en sert pas).
-            Z.get({uri: uriGroup + '/group/' + eltId, callback: function (err, xhr) {
-                    if (err) return console.error(err);
-                    R.listComplete[id].name = eltFrom.value;
-                    eltTo.textContent = R.listComplete[id].name;
 
-                    if (Z.qs('#' + eltId + ' .glyphicon-warning-sign')) Z.qs('#' + eltId + ' .glyphicon-warning-sign').remove();
-                    POPIN.hide(div);
+            var url = encodeURIComponent(JSON.stringify(uriGroup + '/group/' + eltId));
+            var name = encodeURIComponent(JSON.stringify(eltFrom.value));
 
+            Z.post({uri: uriGroup + '/group/' + eltId + ' name=' + eltFrom.value, callback: function (err, xhr) {
+            //Z.get({uri: 'update?url=' + url + '&name=' + name, callback: function (err, xhr) {
+                if (err) return console.error(err);
+                // TODO: ne modifie que l'affichage : optimiser lors de l'accès à la base
+                // TODO: Faudra vérifier si la nouvelle valeur est conforme (avertissement si ce n'est pas le cas),
+                // TODO: mettre à jour la base puis récupérer la nouvelle valeur en base et mettre à jour l'affichage
+                // TODO: (avertissement si non conforme).
+                // (on va chercher la donnée dans la ban mais on ne s'en sert pas).
+                 Z.get({uri: uriGroup + '/group/' + eltId, callback: function (err, xhr) {
+                        if (err) return console.error(err);
+                        var group = JSON.parse(xhr.responseText);
+
+                        R.listComplete[id].name = group.name;
+                        eltTo.textContent = R.listComplete[id].name;
+
+                        if (Z.qs('#' + eltId + ' .glyphicon-warning-sign')) Z.qs('#' + eltId + ' .glyphicon-warning-sign').remove();
+                        POPIN.hide(div);
+
+                    }});
                 }});
             }
         }});
@@ -92,6 +102,8 @@ POPIN.removeAndHide = function(div, object) {
 
     R.displayNbListComplete(R.listComplete.length);
     R.displayNbFirstList();
+
+    N.afterAction();
 
     return POPIN.hide(div);
 }
