@@ -118,7 +118,7 @@ R.verifyNbGroups = function(nbGroups) {
         var error_message = 'Erreur : Le nombre de voies fourni à l\'IHM (' + nbGroups + ') et calculé lors de l\'affichage (' + R.listComplete.length + ') ne correspondent pas !!!';
         throw error_message;
     }
-}
+ }
 
  // ---------------------------------- Affiche la liste des voies d'une commune ----------------------------------------------------
 
@@ -143,7 +143,7 @@ R.groupListWithoutUlTmpl = '{{#each set_of_groups as |groups_in_set num_set|}}'
         +       '</li>'
         +   '{{#each groups_in_set as |group num_group_in_set|}}'
         +       '{{#if_diff num_group_in_set "length"}}'
-        +       '<li class="block__group" id={{id}} data-set_id="{{@num_set}}" data-group_id="{{@num_group_in_set}}">'
+        +       '<li class="block__group" id={{id}} data-set_id="{{@num_set}}" data-group_id="{{@num_group_in_set}}" data-version="">'
         +           '<div class="groupname" >'
         +               '{{# if message_alert}}<i class="' + R.listIcones['warning'] + '" '
         +                   'title="{{message_alert}}">'
@@ -157,16 +157,27 @@ R.groupListWithoutUlTmpl = '{{#each set_of_groups as |groups_in_set num_set|}}'
         +'</li>{{/each}}';
 
 R.displayGroups = function(encodedGroups, nbGroups) {
-    var JSONgroups = decodeURIComponent(encodedGroups);
-    var municipality = JSON.parse(JSONgroups).name;
-    var citycode = JSON.parse(JSONgroups).citycode;
-    var groups = JSON.parse(JSONgroups).groups;
 
-    Z.qs("#pagetitle").innerHTML = 'Commune de ' + municipality + ' (' + citycode + ')';
+        var JSONgroups = decodeURIComponent(encodedGroups);
 
-    listUpdate.innerHTML = Handlebars.compile(R.groupListWithoutUlTmpl)({ set_of_groups: groups });
+        var municipality = JSON.parse(JSONgroups).name;
+        var citycode = JSON.parse(JSONgroups).citycode;
 
-    R.pageInit(groups, nbGroups);
+        if (nbGroups > 0) {
+            var groups = JSON.parse(JSONgroups).groups;
+
+            var titre = 'Commune de ' + municipality + ' (' + citycode + ')';
+
+            listUpdate.innerHTML = Handlebars.compile(R.groupListWithoutUlTmpl)({ set_of_groups: groups });
+
+            R.pageInit(groups, nbGroups);
+        }
+        else {
+            var titre = 'Pas de voie pour la commune de ' + municipality + ' (' + citycode + ')';
+        }
+
+        Z.qs("#pagetitle").innerHTML = titre;
+
 }
 
  // ----------------------------------Gestion des mouvements d'une liste à l'autre ------------------------------------

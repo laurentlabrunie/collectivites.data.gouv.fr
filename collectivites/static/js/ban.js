@@ -1,8 +1,17 @@
 'use strict';
 
 var BAN = {};
-//var uriGroup = 'http://ban-dev.data.gouv.fr';
-var uriGroup = 'http://localhost:5959';
+
+/* Initie une variable en session avec l'url ban définie dans le fichier de conf
+        et passée via le fichier index.html */
+BAN.setUri = function(uri) {
+    sessionStorage.setItem("uriGroup", uri);
+}
+
+/* Renvoie l'url ban définie en variable session */
+BAN.getUri = function() {
+    return sessionStorage.getItem("uriGroup");
+}
 
 BAN.balUploader = function (selector) {
 
@@ -39,7 +48,7 @@ var groupListTmpl = '<ul>{{#each groups}}<li>{{name}}</li>{{/each}}</ul>';
 
 BAN.listGroups = function (selector, municipality) {
     municipality = municipality || '01001';
-    Z.get({ uri: uriGroup + '/municipality/insee:' + municipality + '/groups?limit=100', callback: function (err, xhr) {
+    Z.get({ uri: BAN.getUri() + '/municipality/insee:' + municipality + '/groups?limit=100', callback: function (err, xhr) {
         if (err) return console.error(err);
         Z.qs(selector).innerHTML = Handlebars.compile(groupListTmpl)({ groups: JSON.parse(xhr.responseText).collection });
     }});
@@ -104,7 +113,7 @@ var groupsMunicipalityArray = [];
 var JSONObj;
 
 BAN.listGroupsComplete = function (selector, municipality) {
-
+console.log(BAN.getUri);
     var citycode = municipality.citycode;
     var name = municipality.name;
 
@@ -115,8 +124,8 @@ BAN.listGroupsComplete = function (selector, municipality) {
 
     citycode = citycode || '01001';
 
-    var uriComplete = uriGroup + '/municipality/insee:' + citycode + '/groups';
-
+    var uriComplete = 'select?url=' + BAN.getUri() + '/municipality/insee:' + citycode + '/groups';
+console.log(uriComplete);
     BAN.banGroups(selector, uriComplete);
 }
 
@@ -125,6 +134,7 @@ BAN.listGroupsComplete = function (selector, municipality) {
 BAN.banGroups = function (selector, url) {
             Z.get({ uri: url , callback: function (err, xhr) {
                 if (err) return console.error(err);
+                if (xhr.status != 200) Z.qs(selector + ' #message').innerHTML = "<h1>" + xhr.status + " : " + xhr.responseText + "<h1>";
 
                 JSONObj = JSON.parse(xhr.responseText);
                 groupsJSONToArray = groupsJSONToArray.concat(JSONObj.collection);
@@ -136,8 +146,8 @@ BAN.banGroups = function (selector, url) {
                     window.dispatchEvent(event);
                 }
                 else {
-                    BAN.banGroups(selector, JSONObj.next);
+                    var urlNext = 'select?url=' + JSONObj.next;
+                    BAN.banGroups(selector, urlNext);
                 }
             }});
     }
-

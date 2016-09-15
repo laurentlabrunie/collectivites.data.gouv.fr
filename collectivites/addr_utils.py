@@ -321,7 +321,7 @@ class AddrGroup:
 
     IS_WELL_CAPITALIZE_RE = re.compile(r'^(?:[A-Z][a-z]*[- \']?)$')
     IS_ONLY_UPPERCASE_RE = re.compile(r'^[- \'A-Z]*$')
-    IS_WITH_REPETITION_RE = re.compile(r'(?P<word>\w+)\W+(?P=word)', re.I)
+    IS_WITH_REPETITION_RE = re.compile(r'(?P<word>\w+)[ ](?P=word)', re.I)
     SPLIT_LABEL_AS_WORD_RE = re.compile(r"[\w]+", re.U | re.X)
 
     LABEL_ONLY_UPPERCASE_ERROR = 1

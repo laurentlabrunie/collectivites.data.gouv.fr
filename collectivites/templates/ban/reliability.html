@@ -14,6 +14,7 @@
         <h2>Fiabiliser les noms de voies dans la BAN</h2>
         <h3 id="pagetitle"></h3>
     </div>
+{% if nb_groups != 0 %}
 
     <div  class="multigrid">
         <div class="grid_header">
@@ -62,8 +63,14 @@
 {% include 'helper/updategroups.html' %}
 {% include 'helper/removegroups.html' %}
 
+{% endif %}
+
 <script>
     R.displayGroups("{{ groups }}", "{{ nb_groups }}");
-    N.initPagination();
+    {% if nb_groups != 0 %}
+        N.initPagination();
+    {% endif %}
 </script>
+
+
 {% endblock content %}

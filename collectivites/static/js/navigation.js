@@ -4,7 +4,6 @@ var N = {
 
     initPagination: function() {
         var list = Z.qsa("#listUpdate .block__set_of_groups:not(.no_group_found):not(.no_group)");
-        console.log(list);
         N.nbPage = Math.ceil(list.length / N.pagination);
         Z.qs("#nbPage").textContent = N.nbPage;
         N.numPage = 1;
