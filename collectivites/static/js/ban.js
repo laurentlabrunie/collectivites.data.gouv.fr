@@ -125,7 +125,7 @@ console.log(BAN.getUri);
     citycode = citycode || '01001';
 
     var uriComplete = 'select?url=' + BAN.getUri() + '/municipality/insee:' + citycode + '/groups';
-console.log(uriComplete);
+
     BAN.banGroups(selector, uriComplete);
 }
 
@@ -135,7 +135,7 @@ BAN.banGroups = function (selector, url) {
             Z.get({ uri: url , callback: function (err, xhr) {
                 if (err) return console.error(err);
                 if (xhr.status != 200) Z.qs(selector + ' #message').innerHTML = "<h1>" + xhr.status + " : " + xhr.responseText + "<h1>";
-
+console.log(xhr.responseText);
                 JSONObj = JSON.parse(xhr.responseText);
                 groupsJSONToArray = groupsJSONToArray.concat(JSONObj.collection);
 

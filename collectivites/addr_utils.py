@@ -321,7 +321,6 @@ class AddrGroup:
 
     IS_WELL_CAPITALIZE_RE = re.compile(r'^(?:[A-Z][a-z]*[- \']?)$')
     IS_ONLY_UPPERCASE_RE = re.compile(r'^[- \'A-Z]*$')
-    IS_WITH_REPETITION_RE = re.compile(r'(?P<word>\w+)[ ](?P=word)', re.I)
     SPLIT_LABEL_AS_WORD_RE = re.compile(r"[\w]+", re.U | re.X)
 
     LABEL_ONLY_UPPERCASE_ERROR = 1
@@ -410,12 +409,17 @@ class AddrGroup:
                     break
 
         # w/ duplicate successive word?
-        dup = self.IS_WITH_REPETITION_RE.search(self.label)
-        if (dup != None):
+        dup = self.is_with_repetition()
+        if dup:
             rc |= self.LABEL_WITH_REPETITION_ERROR
 
         return rc
 
+    def is_with_repetition(self):
+        for word in self._wordsUpper:
+            if self._wordsUpper.count(word) > 1:
+                return True
+        return False
 
     @property
     def guess_strong_word(self):

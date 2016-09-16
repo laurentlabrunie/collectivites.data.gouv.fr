@@ -56,10 +56,10 @@ POPIN.updateAndHide = function(div, object) {
         }
         else {
 
-            var url = uriGroup + '/group/' + eltId;
+            var url = BAN.getUri() + '/group/' + eltId;
             var name = eltFrom.value;
 
-            Z.get({uri: 'update?url=' + uriGroup + '/group/' + eltId + '&name=' + eltFrom.value, callback: function (err, xhr) {
+            Z.get({uri: 'update?url=' + BAN.getUri() + '/group/' + eltId + '&name=' + eltFrom.value, callback: function (err, xhr) {
                 if (err) return console.error(err);
 
                 // TODO: ne modifie que l'affichage : optimiser lors de l'accès à la base
@@ -67,7 +67,7 @@ POPIN.updateAndHide = function(div, object) {
                 // TODO: mettre à jour la base puis récupérer la nouvelle valeur en base et mettre à jour l'affichage
                 // TODO: (avertissement si non conforme).
                 // (on va chercher la donnée dans la ban mais on ne s'en sert pas).
-                 Z.get({uri: 'select?url=' + uriGroup + '/group/' + eltId, callback: function (err, xhr) {
+                 Z.get({uri: 'select?url=' + BAN.getUri() + '/group/' + eltId, callback: function (err, xhr) {
                         if (err) return console.error(err);
                         var group = JSON.parse(xhr.responseText);
 
