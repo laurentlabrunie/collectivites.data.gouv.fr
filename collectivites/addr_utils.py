@@ -416,9 +416,14 @@ class AddrGroup:
         return rc
 
     def is_with_repetition(self):
-        for word in self._wordsUpper:
-            if self._wordsUpper.count(word) > 1:
-                return True
+        """
+        identifie dans la liste de mots si des mots qui se suivent sont identiques
+        :return: boolean
+        """
+
+        for nbWord in range(len(self._wordsUpper)-1):
+            if self._wordsUpper[nbWord] == self._wordsUpper[nbWord+1]:
+                    return True
         return False
 
     @property

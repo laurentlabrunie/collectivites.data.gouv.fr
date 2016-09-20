@@ -21,7 +21,6 @@ def index():
 def auth_required(func):
     @wraps(func)
     def wrapper():
-        sess = session
         if not session.get('oauth_token'):
             return redirect('/')  # TODO login page.
         return func()
