@@ -77,11 +77,25 @@ BAN.searchMunicipality = function (selector, q) {
         }).map(function (f) {
             return { name: f.properties.name, citycode: f.properties.citycode, department: f.properties.citycode.substr(0, 2) };
         })
+        municipalities = BAN.deleteDuplicated(municipalities);
         Z.qs(selector + ' .results').innerHTML = Handlebars.compile(resultsTmpl)({ municipalities: municipalities });
         Z.qs(selector + ' .results').classList.remove('hidden');
     }});
 }
 
+/* supprime les doublons de la liste des communes */
+BAN.deleteDuplicated = function (lstMunicipalities) {
+    var newList = [];
+    var oldMunicipality = '';
+
+    for (var key=0; key < lstMunicipalities.length; key++) {
+        if (oldMunicipality != lstMunicipalities[key]['name'] + lstMunicipalities[key]['citycode']) {
+            oldMunicipality = lstMunicipalities[key]['name'] + lstMunicipalities[key]['citycode'];
+            newList.push(lstMunicipalities[key]);
+        }
+    }
+    return newList;
+}
 
 /* Recherche les communes correspondant à la saisie puis les affiche sous forme de lien
         qui lance la génération de la liste des voies pour la commune et ouvre l'IHM de fiabilisation. */
