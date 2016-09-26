@@ -8,5 +8,6 @@ DATAGOUV_CONSUMER_KEY = "XXXX"
 DATAGOUV_CONSUMER_SECRET = "YYYY"
 BAN_CLIENT_ID = ''
 BAN_CLIENT_SECRET = ''
-BAN_URL = 'http://ban-dev.data.gouv.fr'
+# BAN_URL = 'http://ban-dev.data.gouv.fr'
 # BAN_URL = 'http://localhost:5959'
+BAN_URL = 'http://cdyi0676.net-courrier.extra.laposte.fr'
