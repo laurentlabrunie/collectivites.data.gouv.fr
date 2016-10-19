@@ -124,7 +124,7 @@ BAN.displaySelectorMunicipalityForDuplicate = function (selector1, selector2) {
 var event = new CustomEvent('endOfLoad');
 var groupsJSONToArray = [];
 var groupsMunicipalityArray = [];
-var JSONObj;
+//var JSONObj;
 
 BAN.listGroupsComplete = function (selector, municipality) {
 console.log(BAN.getUri);
@@ -138,7 +138,7 @@ console.log(BAN.getUri);
 
     citycode = citycode || '01001';
 
-    var uriComplete = 'select?url=' + BAN.getUri() + '/municipality/insee:' + citycode + '/groups';
+    var uriComplete = 'select?url=' + BAN.getUri() + '/group?municipality=insee:' + citycode + '&limit=1000';
 
     BAN.banGroups(selector, uriComplete);
 }
@@ -146,22 +146,24 @@ console.log(BAN.getUri);
 /* fonction récurrente qui empile les listes de voies (groups) récupérées par paquets pour en faire la liste complète
         et la stocke en session */
 BAN.banGroups = function (selector, url) {
-            Z.get({ uri: url , callback: function (err, xhr) {
-                if (err) return console.error(err);
-                if (xhr.status != 200) Z.qs(selector + ' #message').innerHTML = "<h1>" + xhr.status + " : " + xhr.responseText + "<h1>";
-console.log(xhr.responseText);
-                JSONObj = JSON.parse(xhr.responseText);
-                groupsJSONToArray = groupsJSONToArray.concat(JSONObj.collection);
+console.log(url);
+    Z.get({ uri: url , callback: function (err, xhr) {
+        if (err) return console.error(err);
+        if (xhr.status != 200) Z.qs(selector + ' #message').innerHTML = "<h1>" + xhr.status + " : " + xhr.responseText + "<h1>"
+        else {
+            var JSONObj = JSON.parse(xhr.responseText);
+            groupsJSONToArray = groupsJSONToArray.concat(JSONObj.collection);
 
-                if (false == JSONObj.hasOwnProperty('next')) {
-                    groupsMunicipalityArray["groups"] = groupsJSONToArray;
+            if (false == JSONObj.hasOwnProperty('next')) {
+                groupsMunicipalityArray["groups"] = groupsJSONToArray;
 
-                    Z.qs(selector + ' input').value = encodeURIComponent(JSON.stringify(groupsMunicipalityArray));
-                    window.dispatchEvent(event);
-                }
-                else {
-                    var urlNext = 'select?url=' + JSONObj.next;
-                    BAN.banGroups(selector, urlNext);
-                }
-            }});
-    }
+                Z.qs(selector + ' input').value = encodeURIComponent(JSON.stringify(groupsMunicipalityArray));
+                window.dispatchEvent(event);
+            }
+            else {
+                var urlNext = 'select?url=' + JSONObj.next;
+                BAN.banGroups(selector, urlNext);
+            }
+        }
+    }});
+}

@@ -143,7 +143,7 @@ R.groupListWithoutUlTmpl = '{{#each set_of_groups as |groups_in_set num_set|}}'
         +       '</li>'
         +   '{{#each groups_in_set as |group num_group_in_set|}}'
         +       '{{#if_diff num_group_in_set "length"}}'
-        +       '<li class="block__group" id={{id}} data-set_id="{{@num_set}}" data-group_id="{{@num_group_in_set}}" data-version="">'
+        +       '<li class="block__group" id="{{id}}" data-set_id="{{@num_set}}" data-group_id="{{@num_group_in_set}}" data-version="{{version}}">'
         +           '<div class="groupname" >'
         +               '{{# if message_alert}}<i class="' + R.listIcones['warning'] + '" '
         +                   'title="{{message_alert}}">'
@@ -165,7 +165,7 @@ R.displayGroups = function(encodedGroups, nbGroups) {
 
         if (nbGroups > 0) {
             var groups = JSON.parse(JSONgroups).groups;
-
+            console.log(groups);
             var titre = 'Commune de ' + municipality + ' (' + citycode + ')';
 
             listUpdate.innerHTML = Handlebars.compile(R.groupListWithoutUlTmpl)({ set_of_groups: groups });
@@ -344,8 +344,11 @@ R.hideSearch = function() {
 R.activateSearch = function() {
 
     var listToShow = R.wordSearch();
-    R.search(listToShow);
-    N.afterAction();
+    if (listToShow.length > 0) {
+        R.search(listToShow);
+        N.afterAction();
+    }
+    else alert("Pas de résultat");
 }
 
 R.wordSearch = function() {
@@ -363,12 +366,18 @@ R.searchWordsInListUpdate= function(wordsList) {
     for (var key = 0; key < list.length; key++) {
         var str = list[key].name;
         str = str.toUpperCase();
+        var nbWordsOK = 0;
         for (var nbwords = 0; nbwords < wordsList.length; nbwords++) {
             var word = wordsList[nbwords];
             word = word.toUpperCase();
+            console.log(word);
+            console.log(str);
             if (str.indexOf(word) != -1) {
-                listLiOK.push(list[key]);
+                nbWordsOK++;
             }
+        }
+        if (nbWordsOK == wordsList.length) {
+            listLiOK.push(list[key]);
         }
     }
     return listLiOK;

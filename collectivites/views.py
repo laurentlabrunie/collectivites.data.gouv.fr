@@ -1,7 +1,7 @@
 from functools import wraps
 
 from flask import (abort, redirect, render_template, request, session,
-                   url_for)
+                   url_for, Markup, flash)
 from flask.ext.oauthlib.client import OAuth
 import requests
 
@@ -19,19 +19,23 @@ def index():
 
 
 def auth_required(func):
+    """ vérification qu'on a bien obtenu le token Oauth2 (existance en session)"""
+
     @wraps(func)
-    def wrapper():
+    def wrapper(*args):
         if not session.get('oauth_token'):
             return redirect('/')  # TODO login page.
-        return func()
+        return func(*args)
     return wrapper
 
 
 def with_ban_session(func):
+    """ acquisition du token ban ou vérification qu'on l'a déjà obtenu (existance en session) """
+
     @wraps(func)
-    def wrapper():
+    def wrapper(*args):
         if not session.get('ban_token'):
-            url = '{base_url}/token'.format(base_url=app.config['BAN_URL'])
+            url = '{base_url}/token/'.format(base_url=app.config['BAN_URL'])
             resp = requests.post(url, data={
                 'grant_type': 'client_credentials',
                 'client_id': app.config['BAN_CLIENT_ID'],
@@ -40,7 +44,28 @@ def with_ban_session(func):
             })
             token = resp.json()['access_token']
             session['ban_token'] = token
-        return func()
+        return func(*args)
+    return wrapper
+
+
+def nb_pass_allowed():
+    """ Nombre de passage accepté pour demander un nouveau token"""
+
+    pass_nb = 2
+    return pass_nb
+
+
+def passage_count(func):
+    """ Compteur de passage pour la demande d'un nouveau token"""
+
+    @wraps(func)
+    def wrapper(*args):
+        pass_nb = 0
+        if args:
+            pass_nb, = args
+        if pass_nb <= nb_pass_allowed():
+            pass_nb += 1
+        return func(pass_nb)
     return wrapper
 
 
@@ -153,6 +178,7 @@ def shared_context():
         "CONTACT_EMAIL": "collectivites@data.gouv.fr"
     }
 
+# -------------------------------------------------------- BAN ------------------------------------------------- #
 
 @app.route('/ban/duplication')
 def ban_duplication():
@@ -161,6 +187,9 @@ def ban_duplication():
 
 @app.route('/ban/reliability', methods=['POST'])
 def ban_reliability():
+    """ traitement de détection des voies supposées identiques à partir de leur nom
+
+    puis ouverture de l'ihm de fiabilisation """
 
     list_content = utils.decode_and_unjson(request.form['list'])
     nb_groups = len(list_content['groups'])
@@ -177,31 +206,79 @@ def ban_reliability():
                            nb_groups=nb_groups)
 
 
-@app.route('/ban/update', methods=['GET', 'POST'])
+@app.route('/ban/update', methods=['GET'])
 @auth_required
 @with_ban_session
-def ban_update():
+@passage_count
+def ban_update(pass_nb):
+    """ appel de l'api en modification (mode POST) """
+
     token = session.get('ban_token')
     auth = "Bearer {}".format(token)
-    url = request.args['url']
-    name = request.args['name']
-    resp = requests.post(url, headers={'Authorization': auth}, data={'name': name})
-    return resp.text
+    get_request = construct_request_to_send_post(request.args)
+    url = get_request['url']
+    data = get_request['data']
+
+    """ les champs modifiés sont envoyés en JSON """
+    resp = requests.post(url, headers={'Authorization': auth}, json=data)
+    return ban_token_expired(ban_update, resp, pass_nb)
 
 
-@app.route('/ban/select', methods=['GET', 'POST'])
+@app.route('/ban/select', methods=['GET'])
 @auth_required
 @with_ban_session
-def ban_select():
+@passage_count
+def ban_select(pass_nb):
+    """ appel de l'api en consultation (mode GET) """
+
     token = session.get('ban_token')
     auth = "Bearer {}".format(token)
-    url = request.args['url']
-    resp = requests.get(url, headers={'Authorization': auth})
-    return resp.text
+    get_request = construct_request_to_send_get(request.args)
+    resp = requests.get(get_request, headers={'Authorization': auth})
+
+    return ban_token_expired(ban_select, resp, pass_nb)
+
+
+def ban_token_expired(func, resp, pass_nb):
+    """ si le token ban est expiré, on supprime le "ban_token" en session et on rappelle la fonction
+     ce qui aura pour conséquence de redemander un nouveau ban_token
+
+     pour éviter que ça boucle, on n'accepte qu'un seul passage """
+
+    if resp.status_code == 401:
+        if pass_nb >= nb_pass_allowed():
+            raise ValueError("token ban expiré et impossible d'en créer un nouveau")
+        session.pop('ban_token', None)
+        return func(pass_nb)
+    else:
+        return resp.text
+
+
+def construct_request_to_send_get(request_received):
+    """ construction du contenu de la requête à envoyer dans le cas d'un GET """
+
+    url = request_received['url']
+    for key, value in request_received.items():
+        if key != 'url':
+            url = url + '&' + key + '=' + value
+    return url
+
+
+def construct_request_to_send_post(request_received):
+    """ construction du contenu de la requête à envoyer dans le cas d'un POST """
+
+    data = dict()
+    for key, value in request_received.items():
+        if key == 'url':
+            url = value
+        else:
+            data[key] = value
+    return {'url': url, 'data': data}
 
 
 @app.route('/ban/verification', methods=['GET'])
 def ban_verification():
+    """ traitement de vérification du bon format des libellés de voies  """
 
     group_name = request.args['groupName']
     addr = addr_utils.AddrGroup(group_name)

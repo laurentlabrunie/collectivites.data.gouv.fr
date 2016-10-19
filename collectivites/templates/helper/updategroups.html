@@ -5,12 +5,16 @@
 {% set popinClass = "popin_update_groups" %}
 {% set idTitle = "Modification du libellé" %}
 
+{% block close %}
+    <i class="glyphicon glyphicon-remove" onClick="return POPIN.hidePopUpdateForGroupsWithoutSave('{{popId}}')" title="Fermer la fenêtre"></i>
+{% endblock%}
+
 {% block popinContent %}
     <form method="post" >
-        <div class="block_info"  id="" >
+        <div class="block_info"  id="" data-version="" data-lastname="" data-diff="">
         </div>
         <div class="block_modif">
-            <input type="text" placeholder="" id="group_name_new" />
+            <input type="text" placeholder="" id="group_name_new"/>
             <input type="button" onclick="return POPIN.updateAndHide('{{popId}}', this)" value="Modifier"/>
         </div>
         <div class="block_alert">

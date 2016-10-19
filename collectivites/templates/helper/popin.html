@@ -1,7 +1,7 @@
 
 <div id="{{popId}}" class="parent_disable {{parentDisableClass}}">
     <div class="popin {{popinClass}}">
-        <i class="glyphicon glyphicon-remove" onClick="return POPIN.hide('{{popId}}')" title="Fermer la fenêtre"></i>
+        {% block close %}{% endblock%}
         <h4>{{idTitle}}</h4>
         {% block popinContent %}{% endblock%}
     </div>
