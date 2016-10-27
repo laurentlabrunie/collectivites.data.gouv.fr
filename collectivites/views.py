@@ -180,6 +180,7 @@ def shared_context():
 
 # -------------------------------------------------------- BAN ------------------------------------------------- #
 
+
 @app.route('/ban/duplication')
 def ban_duplication():
     return render_template('ban/duplication.html')
@@ -206,6 +207,16 @@ def ban_reliability():
                            nb_groups=nb_groups)
 
 
+def update_flag(url, auth, with_flag, version):
+    """mise à jour du flag"""
+
+    url_flag = url + "/versions/" + version + "/flag"
+    flag_status = requests.post(url_flag,
+                                headers={'Authorization': auth},
+                                json={'status': with_flag})
+    return flag_status
+
+
 @app.route('/ban/update', methods=['GET'])
 @auth_required
 @with_ban_session
@@ -217,11 +228,14 @@ def ban_update(pass_nb):
     auth = "Bearer {}".format(token)
     get_request = construct_request_to_send_post(request.args)
     url = get_request['url']
+    with_flag = get_request['flag']
     data = get_request['data']
 
     """ les champs modifiés sont envoyés en JSON """
     resp = requests.post(url, headers={'Authorization': auth}, json=data)
-    return ban_token_expired(ban_update, resp, pass_nb)
+    ban_token = ban_token_expired(ban_update, resp, pass_nb)
+    update_flag(url, auth, with_flag, data["version"])
+    return ban_token
 
 
 @app.route('/ban/select', methods=['GET'])
@@ -235,8 +249,8 @@ def ban_select(pass_nb):
     auth = "Bearer {}".format(token)
     get_request = construct_request_to_send_get(request.args)
     resp = requests.get(get_request, headers={'Authorization': auth})
-
-    return ban_token_expired(ban_select, resp, pass_nb)
+    ban_token = ban_token_expired(ban_select, resp, pass_nb)
+    return ban_token
 
 
 def ban_token_expired(func, resp, pass_nb):
@@ -271,9 +285,14 @@ def construct_request_to_send_post(request_received):
     for key, value in request_received.items():
         if key == 'url':
             url = value
+        elif key == 'flag':
+            """ teste si la chaine a pour valeur "True"
+
+            et dans ce cas renvoie le booléen True, sinon le booléen False"""
+            flag = value == "True"
         else:
             data[key] = value
-    return {'url': url, 'data': data}
+    return {'url': url, 'flag': flag, 'data': data}
 
 
 @app.route('/ban/verification', methods=['GET'])

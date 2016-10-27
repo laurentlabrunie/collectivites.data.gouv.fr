@@ -226,6 +226,7 @@ R.HideOrShowSetWhereListChange = function(elt, idWhere) {
     }
 }
 
+//idWhere : identificateur pour la liste de réception
 R.moveInButton = function(element, idWhere) {
     var eltToMove = Z.parents('LI', element);
 
@@ -370,8 +371,7 @@ R.searchWordsInListUpdate= function(wordsList) {
         for (var nbwords = 0; nbwords < wordsList.length; nbwords++) {
             var word = wordsList[nbwords];
             word = word.toUpperCase();
-            console.log(word);
-            console.log(str);
+
             if (str.indexOf(word) != -1) {
                 nbWordsOK++;
             }
@@ -383,38 +383,44 @@ R.searchWordsInListUpdate= function(wordsList) {
     return listLiOK;
 }
 
+
+R.displayInFirstListOrNot = function(groupId, listDisplayed) {
+    var display = R.displayNo;
+    var endOfLoop = false;
+    var key = 0;
+
+    do {
+        if (groupId == listDisplayed[key]['id']) {
+            display = R.displayYes;
+            endOfLoop = true;
+        }
+        key++;
+        if(!listDisplayed[key]) {
+            endOfLoop = true;
+        }
+    } while (!endOfLoop);
+
+    return display;
+}
+
+
 R.search = function(listDisplayed) {
     var list = R.listComplete;
-    var display;
-    var key2;
-    var endOfLoop;
+
     var oldSetId = null;
 
     R.nbDisplayedInFirstList = 0;
 
     for (var key = 0; key < list.length; key++) {
-        display = R.displayNo;
-        key2 = 0;
-        endOfLoop = false;
-
-        do {
-            if (list[key]['id'] == listDisplayed[key2]['id']) {
-                display = R.displayYes;
-                endOfLoop = true;
-            }
-            key2++;
-            if(!listDisplayed[key2]) {
-                endOfLoop = true;
-            }
-        } while (!endOfLoop);
-
-        R.listComplete[key].displayInFirstList = display;
-
-        var elt = Z.qs('#' + list[key]['id']);
+        var groupId = list[key]['id'];
+        var elt = Z.qs('#' + groupId);
         var parentUl = Z.parents('ul', elt);
         var setId =  R.listComplete[key].setId;
 
-        if (parentUl.id != R.secondListName ) {
+        var display = R.displayInFirstListOrNot(groupId, listDisplayed);
+        R.listComplete[key].displayInFirstList = display;
+
+        if (parentUl.id != R.secondListName) {
             if (display == R.displayYes) {
                 R.nbDisplayedInFirstList++;
                 R.removeClass(elt, 'word_not_found');

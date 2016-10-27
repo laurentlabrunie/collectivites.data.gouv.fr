@@ -6,6 +6,9 @@ POPIN.popUpdateForGroups = function(div, object) {
     var eltFrom = Z.parents('LI', object);
     var eltTo = Z.qs('.popin_update_groups .block_info');
     var warning = Z.qs('#upd_groups .warning');
+    var newName = Z.qs('#group_name_new');
+
+    newName.value = "";
 
     Z.get({uri:'select?url=' + BAN.getUri() + '/group/' + eltFrom.id, callback: function (err, xhr) {
         if (err) return console.error(err);
@@ -32,8 +35,7 @@ POPIN.popUpdateForGroups = function(div, object) {
 
         eltTo.innerHTML = '<p>Modification du libellé de la voie "' + lastName + '"</p>';
 
-        var eltTo2 = Z.qs('#group_name_new');
-        eltTo2.placeholder = lastName;
+        newName.placeholder = lastName;
 
         return POPIN.pop(div);
     }});
@@ -87,8 +89,9 @@ POPIN.updateAndHide = function(div) {
 
     var eltId = Z.qs('.popin_update_groups .block_info').id;
     var eltVersion = Z.qs('.popin_update_groups .block_info').dataset.version;
-    var eltVersion1 = parseInt(eltVersion,10)+parseInt(1,10);
-    var eltTo = Z.qs('#' + eltId + ' span');
+    var eltVersion1 = parseInt(eltVersion,10) + parseInt(1,10);
+    var eltToSpan = Z.qs('#' + eltId + ' span');
+    var eltTo = Z.parents("LI", eltToSpan);
     var id = R.getIdByBanId(eltId);
     var eltFrom = Z.qs('#group_name_new');
     var warning = Z.qs('#upd_groups .warning');
@@ -99,35 +102,28 @@ POPIN.updateAndHide = function(div) {
         return;
     }
 
-    if (eltTo.textContent != eltFrom.value) {
+    if (eltToSpan.textContent != eltFrom.value) {
 
+        Z.get({uri: "verification?groupName=" + eltFrom.value, callback: function (err, xhr) {
+            if (err) return console.error(err);
 
-    Z.get({uri: "verification?groupName=" + eltFrom.value, callback: function (err, xhr) {
-        if (err) return console.error(err);
+            var alertResponse = JSON.parse(xhr.responseText);
+            if (alertResponse.alert == true) {
+                warning.innerHTML = alertResponse.message_alert.replace(/\n/g, '<br />');
+            }
+            else {
 
-        var alertResponse = JSON.parse(xhr.responseText);
-        if (alertResponse.alert == true) {
-            warning.innerHTML = alertResponse.message_alert.replace(/\n/g, '<br />');
-        }
-        else {
+                Z.get({uri: 'update?url=' + BAN.getUri() + '/group/' + eltId + '&name=' + eltFrom.value + '&version=' + eltVersion1 + '&flag=True', callback: function (err, xhr) {
+                    if (err) return console.error(err);
 
-            var url = BAN.getUri() + '/group/' + eltId;
-            var name = eltFrom.value;
-
-            Z.get({uri: 'update?url=' + BAN.getUri() + '/group/' + eltId + '&name=' + eltFrom.value + '&version=' + eltVersion1, callback: function (err, xhr) {
-                if (err) return console.error(err);
-
-                // TODO: ne modifie que l'affichage : optimiser lors de l'accès à la base
-                // TODO: Faudra vérifier si la nouvelle valeur est conforme (avertissement si ce n'est pas le cas),
-                // TODO: mettre à jour la base puis récupérer la nouvelle valeur en base et mettre à jour l'affichage
-                // TODO: (avertissement si non conforme).
-                // (on va chercher la donnée dans la ban mais on ne s'en sert pas).
-                 Z.get({uri: 'select?url=' + BAN.getUri() + '/group/' + eltId, callback: function (err, xhr) {
+                    Z.get({uri: 'select?url=' + BAN.getUri() + '/group/' + eltId, callback: function (err, xhr) {
                         if (err) return console.error(err);
                         var group = JSON.parse(xhr.responseText);
 
                         R.listComplete[id].name = group.name;
-                        eltTo.textContent = R.listComplete[id].name;
+                        R.listComplete[id].version = group.version;
+                        eltToSpan.textContent = R.listComplete[id].name;
+                        eltTo.dataset.version = R.listComplete[id].version;
 
                         if (Z.qs('#' + eltId + ' .glyphicon-warning-sign')) Z.qs('#' + eltId + ' .glyphicon-warning-sign').remove();
                         POPIN.hide(div);

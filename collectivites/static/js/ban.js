@@ -124,10 +124,9 @@ BAN.displaySelectorMunicipalityForDuplicate = function (selector1, selector2) {
 var event = new CustomEvent('endOfLoad');
 var groupsJSONToArray = [];
 var groupsMunicipalityArray = [];
-//var JSONObj;
 
 BAN.listGroupsComplete = function (selector, municipality) {
-console.log(BAN.getUri);
+
     var citycode = municipality.citycode;
     var name = municipality.name;
 
@@ -146,7 +145,7 @@ console.log(BAN.getUri);
 /* fonction récurrente qui empile les listes de voies (groups) récupérées par paquets pour en faire la liste complète
         et la stocke en session */
 BAN.banGroups = function (selector, url) {
-console.log(url);
+
     Z.get({ uri: url , callback: function (err, xhr) {
         if (err) return console.error(err);
         if (xhr.status != 200) Z.qs(selector + ' #message').innerHTML = "<h1>" + xhr.status + " : " + xhr.responseText + "<h1>"
