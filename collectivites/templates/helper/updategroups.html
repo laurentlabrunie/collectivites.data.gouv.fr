@@ -16,6 +16,7 @@
         <div class="block_modif">
             <input type="text" placeholder="" id="group_name_new"/>
             <input type="button" onclick="return POPIN.updateAndHide('{{popId}}', this)" value="Modifier"/>
+            <input type="button" onclick="return POPIN.hidePopUpdateForGroupsWithoutSave('{{popId}}')" value="Annuler"/>
         </div>
         <div class="block_alert">
             <p class="warning"></p>

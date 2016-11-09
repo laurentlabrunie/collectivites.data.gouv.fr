@@ -23,7 +23,6 @@
     color: #000;
     background-color: #fff;
     position:relative;
-
 }
 
 .popin .glyphicon-remove {
@@ -33,32 +32,43 @@
     cursor: pointer;
 }
 
-.popin_update_groups,
-.popin_remove_groups {
-    width:500px;
-    height:300px;
-    border-radius:10px 10px;
-    top:20%
-}
-
-.popin_update_groups h4,
-.popin_remove_groups h4 {
+.popin h4 {
     text-align: center;
 }
 
-.popin_update_groups .block_modif,
-.popin_remove_groups .block_modif{
+.popin .block_modif {
     height:10%;
     text-align: center;
-    }
+}
 
-.popin_update_groups .block_info,
-.popin_remove_groups .block_info{
+.popin .block_info {
     border-radius:10px 10px;
     width:95%;
     margin: auto;
     display: inline-block;
     text-align: left;
+}
+
+.popin .block_modif input[type="button"] {
+    display: inline-block;
+    background: #D19EA2;
+    border-radius:10px 0px;
+    width:50%;
+}
+
+.popin_update_groups,
+.popin_remove_groups {
+    width:500px;
+    height:300px;
+    border-radius:10px 10px;
+    top:20%;
+}
+
+.popin_manage_num {
+    width:1000px;
+    height:600px;
+    border-radius:10px 10px;
+    top:20%;
 }
 
 .popin_update_groups .block_modif input[type="text"] {
@@ -67,14 +77,6 @@
     margin: auto;
     display: inline-block;
     text-align: left;
-}
-
-.popin_update_groups .block_modif input[type="button"],
-.popin_remove_groups .block_modif input[type="button"]{
-    display: inline-block;
-    background: #D19EA2;
-    border-radius:10px 0px;
-    width:50%;
 }
 
 .popin_update_groups .block_alert p {

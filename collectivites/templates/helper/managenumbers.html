@@ -1,0 +1,21 @@
+{% extends "helper/popin.html" %}
+
+{% set popId = "manage_num" %}
+{% set parentDisableClass = "parent_disable_groups" %}
+{% set popinClass = "popin_manage_num" %}
+{% set idTitle = "Suppression de la voie" %}
+
+{% block close %}
+    <i class="glyphicon glyphicon-remove" onClick="return POPIN.hide('{{popId}}')" title="Fermer la fenêtre"></i>
+{% endblock%}
+
+{% block popinContent %}
+    <form method="post" >
+        <div class="block_info"  id="" >
+        </div>
+        <div class="block_modif">
+                <input type="button" onclick="return POPIN.hide('{{popId}}', this)" value="Valider"/>
+                <input type="button" onclick="return POPIN.hide('{{popId}}', this)" value="Annuler"/>
+        </div>
+    </form>
+{% endblock%}

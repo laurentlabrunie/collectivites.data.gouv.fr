@@ -1,4 +1,5 @@
 'use strict';
+
 var R = {
     listComplete: [],
     firstListName: 'listUpdate',
@@ -24,7 +25,6 @@ var R = {
     pageInit: function(setList, nbGroups) {
         R.hideSearch();
         R.listComplete = R.initList(setList);
-        R.nbDisplayedInFirstList = R.listComplete.length;
         R.verifyNbGroups(nbGroups);
         R.nbDisplayedInFirstList = nbGroups;
         R.displayNbListComplete(nbGroups);
@@ -122,7 +122,6 @@ R.verifyNbGroups = function(nbGroups) {
 
  // ---------------------------------- Affiche la liste des voies d'une commune ----------------------------------------------------
 
-
 R.groupIconAfter = '<a href="#" onClick="return POPIN.popUpdateForGroups(\'upd_groups\', this)"><i class="buttonIcon ' + R.listIcones['edit'] + '" title="Modifier le libellé de la voie"></i></a>'
         + '<a href="#" onClick="return POPIN.popRemoveForGroups(\'rem_groups\', this)"><i class="buttonIcon ' + R.listIcones['remove'] + '" title="Supprimer la voie"></i></a>'
         + '<a href="#" onClick="R.moveInButton(this, \'#listSelect\')"><i class="buttonIcon ' + R.listIcones['gotoright'] + '" title="Déplacer dans le sas de fiabilisation"></i></a>';
@@ -165,7 +164,7 @@ R.displayGroups = function(encodedGroups, nbGroups) {
 
         if (nbGroups > 0) {
             var groups = JSON.parse(JSONgroups).groups;
-            console.log(groups);
+
             var titre = 'Commune de ' + municipality + ' (' + citycode + ')';
 
             listUpdate.innerHTML = Handlebars.compile(R.groupListWithoutUlTmpl)({ set_of_groups: groups });
@@ -341,12 +340,12 @@ R.hideSearch = function() {
     Z.hide('.block__search .block__search-content');
 }
 
-// ------------------------- Recherche ----------------------------------------
+// ------------------------------------------ Recherche ----------------------------------------
 R.activateSearch = function() {
 
     var listToShow = R.wordSearch();
     if (listToShow.length > 0) {
-        R.search(listToShow);
+        R.searchResult(listToShow);
         N.afterAction();
     }
     else alert("Pas de résultat");
@@ -359,13 +358,12 @@ R.wordSearch = function() {
     return list;
 }
 
+// Définition des voies à afficher
 R.searchWordsInListUpdate= function(wordsList) {
     var listLiOK = [];
 
-    var list = R.listComplete;
-
-    for (var key = 0; key < list.length; key++) {
-        var str = list[key].name;
+    for (var key = 0; key < R.listComplete.length; key++) {
+        var str = R.listComplete[key].name;
         str = str.toUpperCase();
         var nbWordsOK = 0;
         for (var nbwords = 0; nbwords < wordsList.length; nbwords++) {
@@ -377,12 +375,11 @@ R.searchWordsInListUpdate= function(wordsList) {
             }
         }
         if (nbWordsOK == wordsList.length) {
-            listLiOK.push(list[key]);
+            listLiOK.push(R.listComplete[key]);
         }
     }
     return listLiOK;
 }
-
 
 R.displayInFirstListOrNot = function(groupId, listDisplayed) {
     var display = R.displayNo;
@@ -403,16 +400,14 @@ R.displayInFirstListOrNot = function(groupId, listDisplayed) {
     return display;
 }
 
-
-R.search = function(listDisplayed) {
-    var list = R.listComplete;
-
+// Affichage du résultat de la recherche ainsi que mise à jour des compteurs et de la pagination
+R.searchResult = function(listDisplayed) {
     var oldSetId = null;
 
     R.nbDisplayedInFirstList = 0;
 
-    for (var key = 0; key < list.length; key++) {
-        var groupId = list[key]['id'];
+    for (var key = 0; key < R.listComplete.length; key++) {
+        var groupId = R.listComplete[key]['id'];
         var elt = Z.qs('#' + groupId);
         var parentUl = Z.parents('ul', elt);
         var setId =  R.listComplete[key].setId;
@@ -450,31 +445,36 @@ R.search = function(listDisplayed) {
 }
 
  // --------------------------------------------------
+ // Réinitialise la recherche
 R.deactivateSearch = function() {
     Z.qs('input[name="words"]').value = "";
     R.activateSearch();
 }
 
+// Incrémente de 1 le nombre de voies présentes dans la première liste (voies paginées inclus)
 R.increaseNbFirstList = function() {
     R.nbDisplayedInFirstList++;
 }
 
+// Décrémente de 1 le nombre de voies présentes dans la première liste (voies paginées inclus)
 R.decreaseNbFirstList = function() {
     R.nbDisplayedInFirstList--;
 }
 
+// Affiche le nombre de voies présentes dans la première liste (voies paginées inclus)
 R.displayNbFirstList = function() {
     Z.qs('#nblistUpdate').textContent = R.nbDisplayedInFirstList;
 }
 
+// Incrémente de 1 le nombre total de voies présentes dans toutes les listes (voies paginées inclus)
 R.increaseNbListComplete = function() {
     R.listComplete.length++;
 }
-
+// Décrémente de 1 le nombre total de voies présentes dans toutes les listes (voies paginées inclus)
 R.decreaseNbListComplete = function() {
     R.listComplete.length--;
 }
-
+// Affiche le nombre total de voies présentes dans toutes les listes (voies paginées inclus)
 R.displayNbListComplete = function(nb) {
     Z.qs('#nbtotal').textContent = nb;
 }
@@ -498,4 +498,38 @@ R.addClass = function(element, className) {
 
 R.removeClass = function (element, className) {
     if (Z.hasClass(element, className)) Z.removeClass(element, className);
+}
+
+// --------------------------------------------- dédoublonnage -------------------------------------------
+
+R.deduplicate = function() {
+    var groups = R.listGroupsToDeDuplicate();
+    console.log(groups);
+}
+
+// Récupère les voies présentes dans le SAS en séparant la voie référence des autres
+R.listGroupsToDeDuplicate = function() {
+    var contentList = Z.qs('#' + R.secondListName)['children'];
+    var checkedElt = Z.qs('#' + R.secondListName + ' input[type="radio"]:checked');
+    var groupId = Z.parents("LI", checkedElt)['id'];
+    var listGroups = {
+        groupToKeep: [],
+        groupToRemove: []
+    };
+
+    for (var key = 0; key < contentList.length; key++) {
+
+        if (contentList[key].id == groupId) {
+            listGroups.groupToKeep.push(contentList[key]);
+        }
+        else {
+        }
+            listGroups.groupToRemove.push(contentList[key]);
+    }
+
+    return listGroups;
+}
+
+R.redirectGroup = function() {
+
 }
