@@ -64,13 +64,6 @@
     top:20%;
 }
 
-.popin_manage_num {
-    width:1000px;
-    height:600px;
-    border-radius:10px 10px;
-    top:20%;
-}
-
 .popin_update_groups .block_modif input[type="text"] {
     border-radius:10px 10px;
     width:95%;

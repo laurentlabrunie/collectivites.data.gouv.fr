@@ -233,9 +233,9 @@ def ban_update(pass_nb):
 
     """ les champs modifiés sont envoyés en JSON """
     resp = requests.post(url, headers={'Authorization': auth}, json=data)
-    ban_token = ban_token_expired(ban_update, resp, pass_nb)
+    resp_text = ban_token_expired(ban_update, resp, pass_nb)
     update_flag(url, auth, with_flag, data["version"])
-    return ban_token
+    return resp_text
 
 
 @app.route('/ban/select', methods=['GET'])
@@ -249,8 +249,38 @@ def ban_select(pass_nb):
     auth = "Bearer {}".format(token)
     get_request = construct_request_to_send_get(request.args)
     resp = requests.get(get_request, headers={'Authorization': auth})
-    ban_token = ban_token_expired(ban_select, resp, pass_nb)
-    return ban_token
+    resp_text = ban_token_expired(ban_select, resp, pass_nb)
+    return resp_text
+
+
+@app.route('/ban/delete', methods=['GET'])
+@auth_required
+@with_ban_session
+@passage_count
+def ban_delete(pass_nb):
+    """ appel de l'api en suppression (mode DELETE) """
+
+    token = session.get('ban_token')
+    auth = "Bearer {}".format(token)
+    url = request.args['url']
+    resp = requests.delete(url, headers={'Authorization': auth})
+    resp_text = ban_token_expired(ban_delete, resp, pass_nb)
+    return resp_text
+
+
+@app.route('/ban/put', methods=['GET'])
+@auth_required
+@with_ban_session
+@passage_count
+def ban_put(pass_nb):
+    """ appel de l'api en création (mode PUT) """
+
+    token = session.get('ban_token')
+    auth = "Bearer {}".format(token)
+    url = request.args['url']
+    resp = requests.put(url, headers={'Authorization': auth})
+    resp_text = ban_token_expired(ban_put, resp, pass_nb)
+    return resp_text
 
 
 def ban_token_expired(func, resp, pass_nb):

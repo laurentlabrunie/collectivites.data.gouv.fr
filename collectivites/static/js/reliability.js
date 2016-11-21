@@ -109,8 +109,15 @@ var R = {
         });
 
         return nbElt;
-    }
+    },
 
+    getSelectorFromListName: function(listName) {
+        return '#' + listName;
+    },
+
+    getListNameFromSelector: function(selector) {
+        return selector.replace('#','');
+    },
 };
 
 R.verifyNbGroups = function(nbGroups) {
@@ -123,7 +130,7 @@ R.verifyNbGroups = function(nbGroups) {
  // ---------------------------------- Affiche la liste des voies d'une commune ----------------------------------------------------
 
 R.groupIconAfter = '<a href="#" onClick="return POPIN.popUpdateForGroups(\'upd_groups\', this)"><i class="buttonIcon ' + R.listIcones['edit'] + '" title="Modifier le libellé de la voie"></i></a>'
-        + '<a href="#" onClick="return POPIN.popRemoveForGroups(\'rem_groups\', this)"><i class="buttonIcon ' + R.listIcones['remove'] + '" title="Supprimer la voie"></i></a>'
+        //+ '<a href="#" onClick="return POPIN.popRemoveForGroups(\'rem_groups\', this)"><i class="buttonIcon ' + R.listIcones['remove'] + '" title="Supprimer la voie"></i></a>'
         + '<a href="#" onClick="R.moveInButton(this, \'#listSelect\')"><i class="buttonIcon ' + R.listIcones['gotoright'] + '" title="Déplacer dans le sas de fiabilisation"></i></a>';
 R.groupRadio = '<INPUT type="radio" name="groupselect" onclick="R.displayUpdate(this)">'
         + '<a href="#" class="updatebtn" onClick="return POPIN.popUpdateForGroups(\'upd_groups\', this)"><i class="buttonIcon ' + R.listIcones['edit'] + '" title="Modifier le libellé de la voie"></i></a>';
@@ -142,7 +149,7 @@ R.groupListWithoutUlTmpl = '{{#each set_of_groups as |groups_in_set num_set|}}'
         +       '</li>'
         +   '{{#each groups_in_set as |group num_group_in_set|}}'
         +       '{{#if_diff num_group_in_set "length"}}'
-        +       '<li class="block__group" id="{{id}}" data-set_id="{{@num_set}}" data-group_id="{{@num_group_in_set}}" data-version="{{version}}">'
+        +       '<li class="block__group" id="{{id}}" data-laposte="{{laposte}}" data-set_id="{{@num_set}}" data-group_id="{{@num_group_in_set}}" data-version="{{version}}">'
         +           '<div class="groupname" >'
         +               '{{# if message_alert}}<i class="' + R.listIcones['warning'] + '" '
         +                   'title="{{message_alert}}">'
@@ -197,7 +204,7 @@ R.moveAllButton = function(element) {
     var list = R.getContentListDisplayedBySetId(setId);
 
     list.forEach(function(eltToMove) {
-        R.moveIn(Z.qs('#' + eltToMove.id), '#' + R.secondListName);
+        R.moveIn(Z.qs('#' + eltToMove.id), R.getSelectorFromListName(R.secondListName));
     });
 
     R.activateButton();
@@ -209,7 +216,7 @@ R.moveAllButton = function(element) {
 R.HideOrShowSetWhereListChange = function(elt, idWhere) {
     var li;
 
-    if (idWhere == '#' + R.secondListName) {
+    if (idWhere == R.getSelectorFromListName(R.secondListName)) {
         var ulFrom = Z.parents('ul', elt);
         li = Z.parents('li', ulFrom);
 
@@ -229,7 +236,7 @@ R.HideOrShowSetWhereListChange = function(elt, idWhere) {
 R.moveInButton = function(element, idWhere) {
     var eltToMove = Z.parents('LI', element);
 
-    if (idWhere == '#' + R.firstListName) {
+    if (idWhere == R.getSelectorFromListName(R.firstListName)) {
         idWhere = idWhere + " [id='" + eltToMove.dataset['set_id'] + "']";
     }
 
@@ -243,9 +250,8 @@ R.moveInButton = function(element, idWhere) {
 }
 
 R.iconeManagement = function(eltToMove, idWhere) {
-    idWhere = idWhere.replace ('#','');
     switch(idWhere) {
-        case R.secondListName:
+        case R.getSelectorFromListName(R.secondListName):
             eltToMove.children[0].innerHTML = R.groupIconBefore + eltToMove.children[0].innerHTML
             eltToMove.children[1].innerHTML = R.groupRadio;
             break;
@@ -261,7 +267,7 @@ R.changeList = function(idWhere, banId) {
     var group = R.listComplete[id];
     var elt =  Z.qs(idWhere + ' #' + banId);
 
-    idWhere = idWhere.split(' ')[0].replace('#','');
+    idWhere = R.getListNameFromSelector(idWhere.split(' ')[0]);
 
     if (idWhere == R.secondListName) {
         if( group.displayInFirstList == R.displayYes ) {
@@ -282,7 +288,7 @@ R.changeList = function(idWhere, banId) {
 
 R.displayUpdate = function(radioClicked) {
     var eltParent = Z.parents('LI', radioClicked);
-    var elts = Z.qsa('#' + R.secondListName + ' .updatebtn');
+    var elts = Z.qsa(R.getSelectorFromListName(R.secondListName) + ' .updatebtn');
 
     for (var eltNb = 0; eltNb < elts.length; eltNb++) {
         elts[eltNb].style.display = R.displayNo;
@@ -293,7 +299,7 @@ R.displayUpdate = function(radioClicked) {
 }
 
 R.radioActivatedOnce = function() {
-    var elts = Z.qsa('#' + R.secondListName + ' input[type="radio"]');
+    var elts = Z.qsa(R.getSelectorFromListName(R.secondListName) + ' input[type="radio"]');
 
     for (var nb = 0; nb < elts.length; nb++) {
         if (elts[nb].checked) {return true;}
@@ -304,7 +310,7 @@ R.radioActivatedOnce = function() {
 // ---------------------------Gestion du bouton de validation du SAS ------------------
 R.activateButton = function() {
     var button = Z.qs('.block__end input[type="button"]');
-    var container = Z.qs('#' + R.secondListName);
+    var container = Z.qs(R.getSelectorFromListName(R.secondListName));
     var state = true;
 
     var moreThanTwoInSas = Z.moreThan(container, 2);
@@ -504,13 +510,13 @@ R.removeClass = function (element, className) {
 
 R.deduplicate = function() {
     var groups = R.listGroupsToDeDuplicate();
-    console.log(groups);
+    return R.redirectAndDelGroup(groups);
 }
 
 // Récupère les voies présentes dans le SAS en séparant la voie référence des autres
 R.listGroupsToDeDuplicate = function() {
-    var contentList = Z.qs('#' + R.secondListName)['children'];
-    var checkedElt = Z.qs('#' + R.secondListName + ' input[type="radio"]:checked');
+    var contentList = Z.qs(R.getSelectorFromListName(R.secondListName))['children'];
+    var checkedElt = Z.qs(R.getSelectorFromListName(R.secondListName) + ' input[type="radio"]:checked');
     var groupId = Z.parents("LI", checkedElt)['id'];
     var listGroups = {
         groupToKeep: [],
@@ -523,13 +529,96 @@ R.listGroupsToDeDuplicate = function() {
             listGroups.groupToKeep.push(contentList[key]);
         }
         else {
-        }
             listGroups.groupToRemove.push(contentList[key]);
+        }
     }
 
     return listGroups;
 }
 
-R.redirectGroup = function() {
+R.redirectAndDelGroup = function(groups) {
+    for (var key = 0; key < groups.groupToRemove.length; key++) {
+        R.selectHouseNumber(groups, key);
+    }
+}
+
+R.selectHouseNumber = function(groups, key) {
+    Z.get({uri: 'select?url=' + BAN.getUri() + '/housenumber?group=' + groups.groupToRemove[key].id + '&limit=1', callback: function (err, xhr) {
+                if (err) return console.error(err);
+                var hNObj = JSON.parse(xhr.responseText);
+                if (hNObj.total > 0) {
+                    var hNId = hNObj.collection[0].id;
+                    return R.selectPosition(hNId, groups, key);
+                }
+                else {
+                    return R.redirectGroup(groups.groupToRemove[key].id, groups.groupToRemove[key].dataset.laposte, groups.groupToKeep[0].dataset.laposte);
+                }
+    }});
+}
+
+R.selectPosition = function(hNId, groups, key) {
+    Z.get({uri: 'select?url=' + BAN.getUri() + '/position?housenumber=' + hNId + '&limit=1', callback: function (err, xhr) {
+                if (err) return console.error(err);
+                console.log(xhr.responseText);
+                var pObj = JSON.parse(xhr.responseText);
+                if (pObj.total > 0) {
+                    var pId = pObj.collection[0].id;
+                    return R.delPosition(pId, hNId, groups, key);
+                }
+                else {
+                    return R.delHouseNumber(hNId, groups, key);
+                }
+    }});
+}
+
+R.delPosition = function(pId, hNId, groups, key) {
+    Z.get({uri: 'delete?url=' + BAN.getUri() + '/position/' + pId, callback: function (err, xhr) {
+                if (err) return console.error(err);
+                return R.selectPosition(hNId, groups, key);
+    }});
+}
+
+R.delHouseNumber = function(hNId, groups, key) {
+    Z.get({uri: 'delete?url=' + BAN.getUri() + '/housenumber/' + hNId, callback: function (err, xhr) {
+                if (err) return console.error(err);
+                return R.selectHouseNumber(groups, key);
+    }});
+}
+
+R.redirectGroup = function(gId, gFrom, gTo) {
+    Z.get({uri: 'put?url=' + BAN.getUri() + '/group/laposte:' + gTo + '/redirects/laposte:' + gFrom, callback: function (err, xhr) {
+                if (err) return console.error(err);
+                return R.delGroup(gId);
+    }});
+}
+
+R.delGroup = function(gId) {
+    Z.get({uri: 'delete?url=' + BAN.getUri() + '/group/' + gId, callback: function (err, xhr) {
+                if (err) return console.error(err);
+                R.remove(gId);
+                return true;
+    }});
+}
+
+R.remove = function(eltId) {
+
+    var eltTo = Z.qs('#' + eltId)
+    var id = R.getIdByBanId(eltId);
+
+    // Supprime de l'affichage
+    eltTo.remove();
+
+    delete R.listComplete[id];
+    R.listComplete = Z.reorgArray(R.listComplete);
+    R.displayNbListComplete(R.listComplete.length);
 
 }
+
+
+
+
+
+
+
+
+

@@ -5,7 +5,6 @@
     <script src="{{ url_for('static', filename='js/reliability.js') }}"></script>
     <script src="{{ url_for('static', filename='js/popin.js') }}"></script>
     <script src="{{ url_for('static', filename='js/managegroups.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/managenumbers.js') }}"></script>
 
 {% endblock %}
 
@@ -34,7 +33,6 @@
             </div>
         </div>
 
-
         <div class="grid_content">
             <div class="block__list">
                 <div class="block__list-title" >
@@ -51,13 +49,12 @@
                     <h4>Sas de fiabilisation <i class="glyphicon glyphicon-info-sign"
                             title="Pour une même voie, rajouter les doublons identifiés et sélectionner le bon libellé ou celui qui correspond à la bonne voie et renseigner le libellé correctement">
                         </i>
-                        <input type="button" value="Numéros" onClick="return POPIN.popManageNumbers('manage_num', this)"/>
                     </h4>
                 </div>
                 <ul class="block__list-content" id="listSelect">
                 </ul>
                 <div class="block__end">
-                    <input type="button" disabled="disabled" value="Valider les doublons" onclick="R.deduplicate()"/>
+                    <input type="button" disabled="disabled" value="Valider" onclick="R.deduplicate()"/>
                 </div>
             </div>
         </div>
@@ -65,7 +62,6 @@
 </div>
 {% include 'helper/updategroups.html' %}
 {% include 'helper/removegroups.html' %}
-{% include 'helper/managenumbers.html' %}
 
 {% endif %}
 

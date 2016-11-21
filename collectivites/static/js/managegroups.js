@@ -139,22 +139,10 @@ POPIN.updateAndHide = function(div) {
 POPIN.removeAndHide = function(div) {
 
     var eltId = Z.qs('.popin_remove_groups .block_info').id;
-    var eltTo = Z.parents('li', Z.qs('#' + R.firstListName + ' #' + eltId));
-    var id = R.getIdByBanId(eltId);
-
-    // TODO: suppression en base
-    // Supprime de l'affichage
-    eltTo.remove();
-
-    delete R.listComplete[id];
-    R.listComplete = Z.reorgArray(R.listComplete);
+    R.remove(eltId);
 
     R.decreaseNbFirstList();
-
-    R.displayNbListComplete(R.listComplete.length);
     R.displayNbFirstList();
-
     N.afterAction();
-
     return POPIN.hide(div);
 }
